@@ -8,7 +8,8 @@
     "android": "expo start --android",
     "ios": "expo start --ios",
     "web": "expo start --web",
-    "lint": "expo lint"
+    "lint": "expo lint",
+    "seed:expenses": "node scripts/seed.expense.mjs"
   },
   "dependencies": {
     "@clerk/expo": "^4.3.0",
