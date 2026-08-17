@@ -1,6 +1,8 @@
+import { useExpenseStore } from "@/store/useExpensesStore";
 import { useAuth } from "@clerk/expo";
 import { Redirect } from "expo-router";
 import { Icon, Label, NativeTabs } from "expo-router/unstable-native-tabs";
+import { useEffect } from "react";
 import { useColorScheme } from "react-native";
 
 export default function TabsLayout() {
@@ -8,6 +10,11 @@ export default function TabsLayout() {
   const colorScheme = useColorScheme();
   const isDark = colorScheme === "dark";
   const tabTintColor = isDark ? "#c5c0ff" : "#584de0";
+  const { fetchExpenses } = useExpenseStore();
+
+  useEffect(() => {
+    fetchExpenses();
+  }, [fetchExpenses]);
 
   if (!isLoaded) {
     return null;

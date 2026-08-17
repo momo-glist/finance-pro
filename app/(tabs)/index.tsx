@@ -1,7 +1,11 @@
+import { useExpenseStore } from "@/store/useExpensesStore";
 import { Text, View } from "react-native";
 import SafeAreaView from "../components/SafeAreaView";
 
 export default function HomeScreen() {
+  const { userExpenses } = useExpenseStore();
+
+  console.log("userExpenses:", userExpenses);
   return (
     <SafeAreaView className="bg-magnolia dark:bg-cinder flex-1">
       <View className="px-6 pt-12">
