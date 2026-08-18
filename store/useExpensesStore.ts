@@ -20,9 +20,9 @@ export const useExpenseStore = create<IExpenseStore>((set, get) => ({
   addExpense: async (input: IExpenseInpute) => {
     try {
       const { title, category, amount, expenseDate } = input || {};
-      const response = await fetch("api/expense", {
+      const response = await fetch("/api/expense", {
         method: "POST",
-        headers: { "Content-type": "application/json" },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           title,
           category,
@@ -34,7 +34,7 @@ export const useExpenseStore = create<IExpenseStore>((set, get) => ({
       const data = await response.json();
 
       set((state) => ({
-        userExpenses: [data.createdExpenses, ...state.userExpenses],
+        userExpenses: [convertKeysToCamelCase(data.createExpenseItem), ...state.userExpenses],
       }));
     } catch (error) {
       console.log("Failed to add expense:", error);
@@ -44,9 +44,9 @@ export const useExpenseStore = create<IExpenseStore>((set, get) => ({
   updateExpense: async (id: string, input: IExpenseInpute) => {
     try {
       const { title, category, amount, expenseDate } = input || {};
-      const response = await fetch("api/expense", {
+      const response = await fetch("/api/expense", {
         method: "PATCH",
-        headers: { "Conten-type": "application/json" },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           title,
           category,
@@ -59,7 +59,7 @@ export const useExpenseStore = create<IExpenseStore>((set, get) => ({
 
       set((stats) => ({
         userExpenses: stats.userExpenses.map((item) =>
-          item.id === id ? data.updatedExpenses : item,
+          item.id === id ? convertKeysToCamelCase(data.createExpenseItem) : item,
         ),
       }));
     } catch (error) {

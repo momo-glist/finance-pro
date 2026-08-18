@@ -36,10 +36,17 @@ const convertKeysToCamelCase = <T>(obj: T): T => {
 };
 
 const getTotalExpense = (expenses: IExpenseItem[]): number => {
-  return expenses.reduce((total, expense) => total + expense.amount, 0);
+  if (!expenses || expenses.length === 0) {
+    return 0;
+  }
+  return expenses.reduce((total, expense) => total + Number(expense.amount || 0), 0);
 };
 
 const getcurrentMonthExpense = (data: IExpenseItem[]): number => {
+  if (!data || data.length === 0) {
+    return 0;
+  }
+
   let currentMonthExpense = 0;
   const currentDate = new Date();
   const currentMonth = currentDate.getMonth();
@@ -53,7 +60,7 @@ const getcurrentMonthExpense = (data: IExpenseItem[]): number => {
       date.getMonth() === currentMonth &&
       date.getFullYear() === currentYear
     ) {
-      currentMonthExpense += expenses.amount;
+      currentMonthExpense += Number(expenses.amount || 0);
     }
   });
 
@@ -61,6 +68,10 @@ const getcurrentMonthExpense = (data: IExpenseItem[]): number => {
 };
 
 const getMonthWiseChartData = (data: IExpenseItem[]) => {
+  if (!data || data.length === 0) {
+    return [];
+  }
+
   const monthlyMap: Record<number, MonthData> = {};
 
   data.forEach((item) => {
@@ -80,7 +91,7 @@ const getMonthWiseChartData = (data: IExpenseItem[]) => {
       };
     }
 
-    monthlyMap[monthIndex].value += Number(item.amount);
+    monthlyMap[monthIndex].value += Number(item.amount || 0);
   });
 
   const chartData = Object.values(monthlyMap)
