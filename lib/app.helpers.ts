@@ -39,7 +39,10 @@ const getTotalExpense = (expenses: IExpenseItem[]): number => {
   if (!expenses || expenses.length === 0) {
     return 0;
   }
-  return expenses.reduce((total, expense) => total + Number(expense.amount || 0), 0);
+  return expenses.reduce(
+    (total, expense) => total + Number(expense.amount || 0),
+    0,
+  );
 };
 
 const getcurrentMonthExpense = (data: IExpenseItem[]): number => {
@@ -104,10 +107,57 @@ const getMonthWiseChartData = (data: IExpenseItem[]) => {
   return chartData;
 };
 
+const getTopCategory = (chartData: IExpenseItem[]) => {
+  const categoriData = getMonthWiseChartData(chartData);
+  const topCategory = {
+    label: "",
+    amount: 0,
+    percentage: 0,
+  };
+  let totalSum = 0;
+
+  categoriData.forEach((category) => {
+    totalSum += category.value;
+    if (category.value > topCategory.amount) {
+      topCategory.amount = category.value;
+      topCategory.label = category.label;
+    }
+  });
+
+  topCategory.percentage = (topCategory.amount / totalSum) * 100;
+
+  return topCategory;
+};
+
+const getCategoryWiseData = (data: IExpenseItem[]) => {
+  const categoryData: Record<string, IExpenseItem[]> = {};
+
+  data.forEach((item) => {
+    if (!categoryData[item.category]) {
+      categoryData[item.category] = [];
+    }
+
+    categoryData[item.category].push(item);
+  });
+
+  const chartData = Object.entries(categoryData).map(([category, expenses]) => {
+    const total = expenses.reduce((sum, item) => sum + Number(item.amount || 0), 0);
+
+    return {
+      label: category,
+      value: total,
+    };
+  });
+
+  return chartData;
+};
+
 export {
   convertKeysToCamelCase,
+  getCategoryWiseData,
   getcurrentMonthExpense,
   getMonthWiseChartData,
+  getTopCategory,
   getTotalExpense
 };
 

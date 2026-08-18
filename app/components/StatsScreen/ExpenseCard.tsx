@@ -26,7 +26,7 @@ const ExpenseCard = ({ expense }: { expense: IExpenseItem }) => {
         </View>
       </View>
       <Text className="text-base font-semibold dark:text-melrose">
-        F{expense.amount}
+        {expense.amount} F
       </Text>
     </View>
   );

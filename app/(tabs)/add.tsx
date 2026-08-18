@@ -2,8 +2,8 @@ import { useExpenseStore } from "@/store/useExpensesStore";
 import { IExpenseCategory } from "@/store/useExpensesStore.types";
 import { CATEGORY_KEY, MAP_CATEGORY_TO_ICON } from "@/utils/constants";
 import { LinearGradient } from "expo-linear-gradient";
-import { router } from "expo-router";
-import React, { useState } from "react";
+import { router, useLocalSearchParams } from "expo-router";
+import React, { useEffect, useState } from "react";
 import {
   ActivityIndicator,
   Alert,
@@ -18,11 +18,27 @@ import {
 import SafeAreaView from "../components/SafeAreaView";
 
 const AddScreen = () => {
-  const [amount, setAmount] = useState<string>("");
-  const [title, setTitle] = useState("");
-  const [selectedCategory, setSelectedCategory] = useState("");
-  const [date, setDate] = useState("");
-  const { addExpense } = useExpenseStore();
+  const {
+    id: paramsId,
+    title: paramsTitle,
+    category,
+    amount: paramsAmount,
+    expense_date,
+  } = useLocalSearchParams<{
+    id: string;
+    title: string;
+    amount: string;
+    expense_date: string;
+    category: IExpenseCategory;
+  }>();
+
+  const [amount, setAmount] = useState<string>(paramsAmount || "");
+  const [title, setTitle] = useState(paramsTitle || "");
+  const [selectedCategory, setSelectedCategory] = useState<
+    IExpenseCategory | string
+  >(category || "");
+  const [date, setDate] = useState(expense_date || "");
+  const { addExpense, updateExpense } = useExpenseStore();
   const [loading, setLoading] = useState(false);
 
   const formatDateForAPI = (inputDate: string) => {
@@ -37,6 +53,11 @@ const AddScreen = () => {
   const handleAddExpense = async () => {
     if (!title || !selectedCategory || !amount || !date) {
       Alert.alert("Erreur", "Sil vous plait renseigner tout le temps");
+      return;
+    }
+
+    if (paramsId) {
+      handleUpdateExpense();
       return;
     }
 
@@ -68,6 +89,41 @@ const AddScreen = () => {
     setSelectedCategory("");
     setDate("");
   };
+
+  const handleUpdateExpense = async () => {
+    setLoading(true);
+
+    await updateExpense(paramsId, {
+      title,
+      category,
+      amount: Number(amount),
+      expenseDate: formatDateForAPI(date),
+    });
+
+    Alert.alert("Bravoo", "Votres depense a été modifier", [
+      {
+        text: "Ajouter une autre",
+        style: "cancel",
+        onPress: () => router.push("/add"),
+      },
+      {
+        text: "Voir tout",
+        onPress: () => router.push("/expense"),
+      },
+    ]);
+
+    setAmount("");
+    setTitle("");
+    setSelectedCategory("");
+    setDate("");
+  };
+
+  useEffect(() => {
+    (setTitle(paramsTitle),
+      setSelectedCategory(category),
+      setAmount(paramsAmount),
+      setDate(formatDateForAPI(expense_date)));
+  }, [paramsTitle, paramsAmount, category, expense_date]);
 
   return (
     <SafeAreaView className="flex-1 dark:bg-cinder bg-magnolio">
@@ -180,7 +236,7 @@ const AddScreen = () => {
               }}
             >
               <Text className="text-center text-white font-medium text-[20px]">
-                Ajouter la depense
+                {paramsId ? "Modifier la dépense" : "Ajouter la dépense"}
               </Text>
             </LinearGradient>
           </Pressable>

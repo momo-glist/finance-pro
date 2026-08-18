@@ -1,7 +1,7 @@
 import {
-    getcurrentMonthExpense,
-    getMonthWiseChartData,
-    getTotalExpense,
+  getcurrentMonthExpense,
+  getMonthWiseChartData,
+  getTotalExpense,
 } from "@/lib/app.helpers";
 import { useExpenseStore } from "@/store/useExpensesStore";
 import { router } from "expo-router";
@@ -37,7 +37,7 @@ export default function HomeScreen() {
               Dépenses mensuelles
             </Text>
             <Text className="dark:text-athens-gray text-white font-bold text-3xl">
-              F{getcurrentMonthExpense(userExpenses)}
+              {getcurrentMonthExpense(userExpenses)} F
             </Text>
           </View>
         </View>
@@ -76,9 +76,12 @@ export default function HomeScreen() {
             </Pressable>
           </View>
           <View className="gap-10">
-            {userExpenses && userExpenses.slice(0, 5).map((expense, index) => (
-              <ExpenseCard key={expense.id || index} expense={expense} />
-            ))}
+            {userExpenses &&
+              userExpenses
+                .slice(0, 5)
+                .map((expense, index) => (
+                  <ExpenseCard key={expense.id || index} expense={expense} />
+                ))}
           </View>
         </View>
       </ScrollView>
