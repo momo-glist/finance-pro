@@ -21,7 +21,7 @@ export default function TabsLayout() {
   }
 
   if (!isSignedIn) {
-    return <Redirect href={"/(auth)/Sign-in"} />;
+    return <Redirect href={"/(auth)/onboarding" as any} />;
   }
 
   return (
