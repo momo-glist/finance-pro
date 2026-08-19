@@ -19,7 +19,7 @@ const ExpenseScreen = () => {
 
     router.push({
       pathname: "/add",
-      params: { id, title, category, amount, expense_date },
+      params: { id, title, category, amount, expense_date: expense_date || (expense as any).expenseDate },
     });
   };
   const handleDelete = async (id: string) => {

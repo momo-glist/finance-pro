@@ -50,6 +50,15 @@ const AddScreen = () => {
     return inputDate;
   };
 
+  const formatDateForDisplay = (inputDate: string) => {
+    if (!inputDate) return "";
+    const parts = inputDate.split("-");
+    if (parts.length === 3) {
+      return `${parts[2]}/${parts[1]}/${parts[0]}`;
+    }
+    return inputDate;
+  };
+
   const handleAddExpense = async () => {
     if (!title || !selectedCategory || !amount || !date) {
       Alert.alert("Erreur", "Sil vous plait renseigner tout le temps");
@@ -122,7 +131,7 @@ const AddScreen = () => {
     (setTitle(paramsTitle),
       setSelectedCategory(category),
       setAmount(paramsAmount),
-      setDate(formatDateForAPI(expense_date)));
+      setDate(formatDateForDisplay(expense_date)));
   }, [paramsTitle, paramsAmount, category, expense_date]);
 
   return (
@@ -133,15 +142,15 @@ const AddScreen = () => {
             ENTRÉ LE MONTANT
           </Text>
           <View className="flex-row items-center mt-4 gap-6 w-[95%]">
-            <Text className="text-[3rem] font-bold dark:text-white text-percian-blue ">
-              F
-            </Text>
             <TextInput
               className="text-[3.75rem] w-[85%] font-bold text-black dark:text-melrose"
               value={amount}
               onChangeText={setAmount}
               keyboardType="numeric"
             />
+            <Text className="text-[3rem] font-bold dark:text-white text-percian-blue ">
+              F
+            </Text>
           </View>
         </View>
 

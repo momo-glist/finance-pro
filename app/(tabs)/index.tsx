@@ -29,7 +29,7 @@ export default function HomeScreen() {
             Dépenses
           </Text>
           <Text className="dark:text-melrose text-white font-extrabold text-[3rem]">
-            F{getTotalExpense(userExpenses).toFixed(2)}
+            {getTotalExpense(userExpenses).toFixed(2)} F
           </Text>
 
           <View className="dark:bg-shark-2 bg-royal-blue p-4 rounded-lg gap-1 mt-6 border border-athens-gray/10 shadow">
