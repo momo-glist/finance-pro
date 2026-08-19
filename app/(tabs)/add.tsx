@@ -1,5 +1,5 @@
-import { useExpenseStore } from "@/store/useExpensesStore";
-import { IExpenseCategory } from "@/store/useExpensesStore.types";
+import { useExpenseStore } from "@/store/useTransactionsStore";
+import { IExpenseCategory } from "@/store/useTransactionsStore.types";
 import { CATEGORY_KEY, MAP_CATEGORY_TO_ICON } from "@/utils/constants";
 import { LinearGradient } from "expo-linear-gradient";
 import { router, useLocalSearchParams } from "expo-router";

@@ -1,4 +1,4 @@
-import { IExpenseItem } from "@/store/useExpensesStore.types";
+import { IExpenseItem } from "@/store/useTransactionsStore.types";
 import { MAP_CATEGORY_TO_ICON } from "@/utils/constants";
 import React from "react";
 import { Image, Pressable, Text, View } from "react-native";
@@ -28,7 +28,7 @@ const TransactionCard = ({
           </Text>
           <Text className="text-gun-powder dark:text-gray-suit">
             {new Date(
-              (expense as any).expenseDate || expense.expense_date
+              (expense as any).expenseDate || expense.expense_date,
             ).toLocaleString("fr-FR", {
               month: "long",
             })}{" "}

@@ -28,7 +28,7 @@ const SignInScreen = () => {
 
       <View className="flex items-center justify-center mt-20">
         <LottieView
-          source={require("../../assets/Wallet Animation.json")}
+          source={require("../../assets/animations/Wallet2.json")}
           autoPlay
           loop
           style={{ width: 200, height: 200 }}

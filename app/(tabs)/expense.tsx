@@ -1,6 +1,6 @@
 import { getCategoryWiseData, getTopCategory } from "@/lib/app.helpers";
-import { useExpenseStore } from "@/store/useExpensesStore";
-import { IExpenseItem } from "@/store/useExpensesStore.types";
+import { useExpenseStore } from "@/store/useTransactionsStore";
+import { IExpenseItem } from "@/store/useTransactionsStore.types";
 import { useRouter } from "expo-router";
 import React from "react";
 import { ScrollView, Text, View } from "react-native";
@@ -19,7 +19,13 @@ const ExpenseScreen = () => {
 
     router.push({
       pathname: "/add",
-      params: { id, title, category, amount, expense_date: expense_date || (expense as any).expenseDate },
+      params: {
+        id,
+        title,
+        category,
+        amount,
+        expense_date: expense_date || (expense as any).expenseDate,
+      },
     });
   };
   const handleDelete = async (id: string) => {

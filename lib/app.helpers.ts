@@ -1,9 +1,9 @@
 import {
-  IExpenseItem,
-  IGenericStringMap,
-  IToCamelCase,
-  MonthData,
-} from "@/store/useExpensesStore.types";
+    IGenericStringMap,
+    IToCamelCase,
+    ITransactionItem,
+    MonthData,
+} from "@/store/useTransactionsStore.types";
 
 const toCamalCase: IToCamelCase = (str) => {
   return str.replace(/([-_][a-z])/gi, (match) =>
@@ -35,17 +35,25 @@ const convertKeysToCamelCase = <T>(obj: T): T => {
   return obj;
 };
 
-const getTotalExpense = (expenses: IExpenseItem[]): number => {
-  if (!expenses || expenses.length === 0) {
+const getTotalIncome = (transactions: ITransactionItem[]): number => {
+  if (!transactions || transactions.length === 0) {
     return 0;
   }
-  return expenses.reduce(
-    (total, expense) => total + Number(expense.amount || 0),
-    0,
-  );
+  return transactions
+    .filter((t) => t.type === "income")
+    .reduce((total, transaction) => total + Number(transaction.amount || 0), 0);
 };
 
-const getcurrentMonthExpense = (data: IExpenseItem[]): number => {
+const getTotalExpense = (transactions: ITransactionItem[]): number => {
+  if (!transactions || transactions.length === 0) {
+    return 0;
+  }
+  return transactions
+    .filter((t) => t.type === "expense")
+    .reduce((total, transaction) => total + Number(transaction.amount || 0), 0);
+};
+
+const getcurrentMonthExpense = (data: ITransactionItem[]): number => {
   if (!data || data.length === 0) {
     return 0;
   }
@@ -55,22 +63,51 @@ const getcurrentMonthExpense = (data: IExpenseItem[]): number => {
   const currentMonth = currentDate.getMonth();
   const currentYear = currentDate.getFullYear();
 
-  data.forEach((expenses: IExpenseItem) => {
-    const dateStr = (expenses as any).expenseDate || expenses.expense_date;
+  data.forEach((transaction: ITransactionItem) => {
+    if (transaction.type !== "expense") return;
+    
+    const dateStr = (transaction as any).transactionDate || transaction.transaction_date;
     const date = new Date(dateStr);
 
     if (
       date.getMonth() === currentMonth &&
       date.getFullYear() === currentYear
     ) {
-      currentMonthExpense += Number(expenses.amount || 0);
+      currentMonthExpense += Number(transaction.amount || 0);
     }
   });
 
   return currentMonthExpense;
 };
 
-const getMonthWiseChartData = (data: IExpenseItem[]) => {
+const getcurrentMonthIncome = (data: ITransactionItem[]): number => {
+  if (!data || data.length === 0) {
+    return 0;
+  }
+
+  let currentMonthIncome = 0;
+  const currentDate = new Date();
+  const currentMonth = currentDate.getMonth();
+  const currentYear = currentDate.getFullYear();
+
+  data.forEach((transaction: ITransactionItem) => {
+    if (transaction.type !== "income") return;
+    
+    const dateStr = (transaction as any).transactionDate || transaction.transaction_date;
+    const date = new Date(dateStr);
+
+    if (
+      date.getMonth() === currentMonth &&
+      date.getFullYear() === currentYear
+    ) {
+      currentMonthIncome += Number(transaction.amount || 0);
+    }
+  });
+
+  return currentMonthIncome;
+};
+
+const getMonthWiseChartData = (data: ITransactionItem[]) => {
   if (!data || data.length === 0) {
     return [];
   }
@@ -78,7 +115,7 @@ const getMonthWiseChartData = (data: IExpenseItem[]) => {
   const monthlyMap: Record<number, MonthData> = {};
 
   data.forEach((item) => {
-    const dateStr = (item as any).expenseDate || item.expense_date;
+    const dateStr = (item as any).transactionDate || item.transaction_date;
     const date = new Date(dateStr);
 
     const monthIndex = date.getMonth();
@@ -107,8 +144,51 @@ const getMonthWiseChartData = (data: IExpenseItem[]) => {
   return chartData;
 };
 
-const getTopCategory = (chartData: IExpenseItem[]) => {
-  const categoriData = getMonthWiseChartData(chartData);
+const getIncomeVsExpenseChartData = (data: ITransactionItem[]) => {
+  if (!data || data.length === 0) {
+    return [];
+  }
+
+  const monthlyMap: Record<number, { income: number; expense: number; label: string; monthIndex: number }> = {};
+
+  data.forEach((item) => {
+    const dateStr = (item as any).transactionDate || item.transaction_date;
+    const date = new Date(dateStr);
+
+    const monthIndex = date.getMonth();
+    const monthLabel = date.toLocaleString("fr-FR", {
+      month: "short",
+    });
+
+    if (!monthlyMap[monthIndex]) {
+      monthlyMap[monthIndex] = {
+        label: monthLabel,
+        income: 0,
+        expense: 0,
+        monthIndex,
+      };
+    }
+
+    if (item.type === "income") {
+      monthlyMap[monthIndex].income += Number(item.amount || 0);
+    } else if (item.type === "expense") {
+      monthlyMap[monthIndex].expense += Number(item.amount || 0);
+    }
+  });
+
+  const chartData = Object.values(monthlyMap)
+    .sort((a, b) => a.monthIndex - b.monthIndex)
+    .map(({ label, income, expense }) => ({
+      label,
+      income,
+      expense,
+    }));
+
+  return chartData;
+};
+
+const getTopCategory = (transactions: ITransactionItem[]) => {
+  const categoryData = getCategoryWiseData(transactions);
   const topCategory = {
     label: "",
     amount: 0,
@@ -116,7 +196,7 @@ const getTopCategory = (chartData: IExpenseItem[]) => {
   };
   let totalSum = 0;
 
-  categoriData.forEach((category) => {
+  categoryData.forEach((category) => {
     totalSum += category.value;
     if (category.value > topCategory.amount) {
       topCategory.amount = category.value;
@@ -124,13 +204,13 @@ const getTopCategory = (chartData: IExpenseItem[]) => {
     }
   });
 
-  topCategory.percentage = (topCategory.amount / totalSum) * 100;
+  topCategory.percentage = totalSum > 0 ? (topCategory.amount / totalSum) * 100 : 0;
 
   return topCategory;
 };
 
-const getCategoryWiseData = (data: IExpenseItem[]) => {
-  const categoryData: Record<string, IExpenseItem[]> = {};
+const getCategoryWiseData = (data: ITransactionItem[]) => {
+  const categoryData: Record<string, ITransactionItem[]> = {};
 
   data.forEach((item) => {
     if (!categoryData[item.category]) {
@@ -140,8 +220,8 @@ const getCategoryWiseData = (data: IExpenseItem[]) => {
     categoryData[item.category].push(item);
   });
 
-  const chartData = Object.entries(categoryData).map(([category, expenses]) => {
-    const total = expenses.reduce((sum, item) => sum + Number(item.amount || 0), 0);
+  const chartData = Object.entries(categoryData).map(([category, transactions]) => {
+    const total = transactions.reduce((sum, item) => sum + Number(item.amount || 0), 0);
 
     return {
       label: category,
@@ -153,11 +233,14 @@ const getCategoryWiseData = (data: IExpenseItem[]) => {
 };
 
 export {
-  convertKeysToCamelCase,
-  getCategoryWiseData,
-  getcurrentMonthExpense,
-  getMonthWiseChartData,
-  getTopCategory,
-  getTotalExpense
+    convertKeysToCamelCase,
+    getCategoryWiseData,
+    getcurrentMonthExpense,
+    getcurrentMonthIncome,
+    getIncomeVsExpenseChartData,
+    getMonthWiseChartData,
+    getTopCategory,
+    getTotalExpense,
+    getTotalIncome
 };
 

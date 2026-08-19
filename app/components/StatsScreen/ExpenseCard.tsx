@@ -1,4 +1,4 @@
-import { IExpenseItem } from "@/store/useExpensesStore.types";
+import { IExpenseItem } from "@/store/useTransactionsStore.types";
 import { getFullDate, MAP_CATEGORY_TO_ICON } from "@/utils/constants";
 import React from "react";
 import { Image, Text, View } from "react-native";

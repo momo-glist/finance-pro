@@ -1,68 +1,154 @@
-import { desc, eq } from "drizzle-orm";
+import { and, desc, eq } from "drizzle-orm";
 import { db } from "./db/client";
-import { expenses } from "./db/schema";
+import { categories, transactions, users } from "./db/schema";
 
-export const getAllExpense = async () => {
+export const createUser = async (data: {
+  id: string;
+  email: string;
+  first_name: string;
+  last_name: string;
+  currency: string;
+}) => {
+  const [user] = await db
+    .insert(users)
+    .values({
+      id: data.id,
+      email: data.email,
+      first_name: data.first_name,
+      last_name: data.last_name,
+      currency: data.currency,
+    })
+    .returning();
+
+  return user;
+};
+
+export const getUser = async (userId: string) => {
+  const [user] = await db.select().from(users).where(eq(users.id, userId));
+
+  return user;
+};
+
+export const getCategories = async (userId: string) => {
   const rows = await db
     .select()
-    .from(expenses)
-    .orderBy(desc(expenses.expense_date));
+    .from(categories)
+    .where(eq(categories.user_id, userId))
+    .orderBy(desc(categories.created_date));
+  
+  return rows;
+};
+
+export const createCategory = async (data: {
+  userId: string;
+  name: string;
+  type: "income" | "expense";
+  icon: string;
+}) => {
+  const [category] = await db
+    .insert(categories)
+    .values({
+      id: crypto.randomUUID(),
+      user_id: data.userId,
+      name: data.name,
+      type: data.type,
+      icon: data.icon,
+    })
+    .returning();
+
+  return category;
+};
+
+export const getAllTransactions = async (userId: string) => {
+  const rows = await db
+    .select()
+    .from(transactions)
+    .where(eq(transactions.user_id, userId))
+    .orderBy(desc(transactions.transaction_date));
 
   return rows;
 };
 
-export const createExpense = async (data: {
+export const createTransaction = async (data: {
+  userId: string;
   title: string;
+  type: "income" | "expense";
   category: string;
   amount: number;
-  expense_date: string;
+  transaction_date: string;
+  categoryIcon?: string;
 }) => {
-  const [expense] = await db
-    .insert(expenses)
+  // Vérifier si la catégorie existe déjà pour cet utilisateur
+  const existingCategory = await db
+    .select()
+    .from(categories)
+    .where(and(eq(categories.name, data.category), eq(categories.user_id, data.userId)))
+    .limit(1);
+
+  // Si la catégorie n'existe pas, la créer automatiquement
+  if (!existingCategory || existingCategory.length === 0) {
+    const defaultIcon = data.categoryIcon || (data.type === "income" ? "trending-up" : "trending-down");
+    await db.insert(categories).values({
+      id: crypto.randomUUID(),
+      user_id: data.userId,
+      name: data.category,
+      type: data.type,
+      icon: defaultIcon,
+    });
+  }
+
+  const [transaction] = await db
+    .insert(transactions)
     .values({
       id: crypto.randomUUID(),
+      user_id: data.userId,
       title: data.title,
+      type: data.type,
       category: data.category,
       amount: data.amount,
-      expense_date: data.expense_date,
+      transaction_date: data.transaction_date,
     })
     .returning();
 
-  return expense;
+  return transaction;
 };
 
-export const updateExpense = async (
+export const updateTransaction = async (
   id: string,
   data: {
     title?: string;
+    type?: "income" | "expense";
     category?: string;
     amount?: number;
-    expense_date?: string;
+    transaction_date?: string;
   },
 ) => {
-  const [expense] = await db
-    .update(expenses)
+  const [transaction] = await db
+    .update(transactions)
     .set({
       ...data,
       updated_at: new Date(),
     })
-    .where(eq(expenses.id, id))
+    .where(eq(transactions.id, id))
     .returning();
 
-  return expense;
+  return transaction;
 };
 
-export const deleteExpense = async (id: string) => {
-  const [expense] = await db
-    .delete(expenses)
-    .where(eq(expenses.id, id))
+export const deleteTransaction = async (id: string) => {
+  const [transaction] = await db
+    .delete(transactions)
+    .where(eq(transactions.id, id))
     .returning();
 
-  return expense;
+  return transaction;
 };
 
-export const getExpenseById = async (id: string) => {
-  const [expense] = await db.select().from(expenses).where(eq(expenses.id, id));
+export const gettransactionById = async (id: string) => {
+  const [transaction] = await db
+    .select()
+    .from(transactions)
+    .where(eq(transactions.id, id));
 
-  return expense;
+  return transaction;
 };

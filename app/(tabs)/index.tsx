@@ -3,7 +3,7 @@ import {
   getMonthWiseChartData,
   getTotalExpense,
 } from "@/lib/app.helpers";
-import { useExpenseStore } from "@/store/useExpensesStore";
+import { useExpenseStore } from "@/store/useTransactionsStore";
 import { router } from "expo-router";
 import { useEffect, useState } from "react";
 import { Pressable, ScrollView, Text, View } from "react-native";
