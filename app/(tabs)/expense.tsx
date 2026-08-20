@@ -1,6 +1,6 @@
 import { getCategoryWiseData, getTopCategory } from "@/lib/app.helpers";
-import { useExpenseStore } from "@/store/useTransactionsStore";
-import { IExpenseItem } from "@/store/useTransactionsStore.types";
+import { useTransactionStore } from "@/store/useTransactionsStore";
+import { ITransactionItem } from "@/store/useTransactionsStore.types";
 import { useRouter } from "expo-router";
 import React from "react";
 import { ScrollView, Text, View } from "react-native";
@@ -8,29 +8,32 @@ import TransactionCard from "../components/ExpenseScreen/TransactionCard";
 import SafeAreaView from "../components/SafeAreaView";
 
 const ExpenseScreen = () => {
-  const { userExpenses, deleteExpense, fetchExpenses } = useExpenseStore();
-  const categoryWiseData = getCategoryWiseData(userExpenses);
+  const { userTransactions, deleteTransaction, fetchTransactions } =
+    useTransactionStore();
+  const categoryWiseData = getCategoryWiseData(userTransactions);
   const total = categoryWiseData.reduce((sum, item) => sum + item.value, 0);
 
   const router = useRouter();
 
-  const handleUpdate = (expense: IExpenseItem) => {
-    const { id, title, category, amount, expense_date } = expense || {};
+  const handleUpdate = (expense: ITransactionItem) => {
+    const { id, title, type, category_id, amount, transaction_date } =
+      expense || {};
 
     router.push({
       pathname: "/add",
       params: {
         id,
         title,
-        category,
+        type,
+        category_id,
         amount,
-        expense_date: expense_date || (expense as any).expenseDate,
+        transaction_date: transaction_date || (expense as any).transactionDate,
       },
     });
   };
   const handleDelete = async (id: string) => {
-    await deleteExpense(id);
-    await fetchExpenses();
+    await deleteTransaction(id);
+    await fetchTransactions(id);
   };
 
   const renderCategoryWiseFunding = () => {
@@ -77,15 +80,15 @@ const ExpenseScreen = () => {
           </View>
           <View className="mt-4">
             <Text className="dark:text-white text-black text-3xl font-semibold mt-1">
-              {getTopCategory(userExpenses).label}
+              {getTopCategory(userTransactions).label}
             </Text>
             <Text className="mt-3 dark:text-white text-black">
               Contribue à {""}
-              {getTopCategory(userExpenses).percentage.toFixed(2)}% de vos
+              {getTopCategory(userTransactions).percentage.toFixed(2)}% de vos
               dépenses total
             </Text>
             <Text className="text-4xl text-persian-blue dark:text-melrose mt-6 font-bold">
-              {getTopCategory(userExpenses).amount.toFixed(2)} F
+              {getTopCategory(userTransactions).amount.toFixed(2)} F
             </Text>
           </View>
         </View>
@@ -97,7 +100,7 @@ const ExpenseScreen = () => {
             Toutes vos transactions
           </Text>
           <View className="gap-10">
-            {userExpenses.slice(0, 5).map((expense) => {
+            {userTransactions.slice(0, 5).map((expense) => {
               return (
                 <TransactionCard
                   key={expense.id}

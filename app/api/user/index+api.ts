@@ -29,16 +29,16 @@ export async function POST(request: Request) {
     const body = await request.json();
     const { id, email, first_name, last_name, currency } = body || {};
 
-    if (!id || !email) {
+    if (!id) {
       return Response.json({
-        error: "Please provide id and email",
+        error: "Please provide id",
         status: 400,
       });
     }
 
     const user = await createUser({
       id,
-      email,
+      email: email || "",
       first_name: first_name || "",
       last_name: last_name || "",
       currency: currency || "XOF",

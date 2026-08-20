@@ -3,12 +3,12 @@ import { deleteTransaction, updateTransaction } from "@/lib/server/db-actions";
 export async function PATH(request: Request, { id }: { id: string }) {
   try {
     const body = await request.json();
-    const { title, type, category, amount, transaction_date } = body || {};
+    const { title, type, category_id, amount, transaction_date } = body || {};
 
     const updateTransactionItem = await updateTransaction(id, {
       title,
       type,
-      category,
+      category_id,
       amount,
       transaction_date,
     });

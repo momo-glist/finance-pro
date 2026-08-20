@@ -3,7 +3,7 @@ import {
   getMonthWiseChartData,
   getTotalExpense,
 } from "@/lib/app.helpers";
-import { useExpenseStore } from "@/store/useTransactionsStore";
+import { useTransactionStore } from "@/store/useTransactionsStore";
 import { router } from "expo-router";
 import { useEffect, useState } from "react";
 import { Pressable, ScrollView, Text, View } from "react-native";
@@ -12,14 +12,14 @@ import SafeAreaView from "../components/SafeAreaView";
 import ExpenseCard from "../components/StatsScreen/ExpenseCard";
 
 export default function HomeScreen() {
-  const { userExpenses } = useExpenseStore();
+  const { userTransactions } = useTransactionStore();
   const [chartData, setChartData] =
     useState<{ label: string; value: number }[]>();
 
   useEffect(() => {
-    const monthData = getMonthWiseChartData(userExpenses);
+    const monthData = getMonthWiseChartData(userTransactions);
     setChartData(monthData);
-  }, [userExpenses]);
+  }, [userTransactions]);
 
   return (
     <SafeAreaView className="bg-magnolia dark:bg-cinder flex-1">
@@ -29,7 +29,7 @@ export default function HomeScreen() {
             Dépenses
           </Text>
           <Text className="dark:text-melrose text-white font-extrabold text-[3rem]">
-            {getTotalExpense(userExpenses).toFixed(2)} F
+            {getTotalExpense(userTransactions).toFixed(2)} F
           </Text>
 
           <View className="dark:bg-shark-2 bg-royal-blue p-4 rounded-lg gap-1 mt-6 border border-athens-gray/10 shadow">
@@ -37,7 +37,7 @@ export default function HomeScreen() {
               Dépenses mensuelles
             </Text>
             <Text className="dark:text-athens-gray text-white font-bold text-3xl">
-              {getcurrentMonthExpense(userExpenses)} F
+              {getcurrentMonthExpense(userTransactions)} F
             </Text>
           </View>
         </View>
@@ -76,8 +76,8 @@ export default function HomeScreen() {
             </Pressable>
           </View>
           <View className="gap-10">
-            {userExpenses &&
-              userExpenses
+            {userTransactions &&
+              userTransactions
                 .slice(0, 5)
                 .map((expense, index) => (
                   <ExpenseCard key={expense.id || index} expense={expense} />

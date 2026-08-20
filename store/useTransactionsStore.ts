@@ -1,4 +1,5 @@
 import { convertKeysToCamelCase } from "@/lib/app.helpers";
+import { API_URL } from "@/lib/config";
 import { create } from "zustand";
 import {
     ITransactionInpute,
@@ -10,7 +11,7 @@ export const useTransactionStore = create<ITransactionStore>((set, get) => ({
 
   fetchTransactions: async (userId: string) => {
     try {
-      const response = await fetch(`/api/transaction?userId=${userId}`);
+      const response = await fetch(`${API_URL}/api/transaction?userId=${userId}`);
       const data = await response.json();
       const parsData = convertKeysToCamelCase(data.transactions);
 
@@ -23,7 +24,7 @@ export const useTransactionStore = create<ITransactionStore>((set, get) => ({
   addTransaction: async (input: ITransactionInpute) => {
     try {
       const { title, type, category_id, amount, transactionDate } = input || {};
-      const response = await fetch("/api/transaction", {
+      const response = await fetch(`${API_URL}/api/transaction`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -51,7 +52,7 @@ export const useTransactionStore = create<ITransactionStore>((set, get) => ({
   updateTransaction: async (id: string, input: ITransactionInpute) => {
     try {
       const { title, type, category_id, amount, transactionDate } = input || {};
-      const response = await fetch("/api/transaction", {
+      const response = await fetch(`${API_URL}/api/transaction`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -79,7 +80,7 @@ export const useTransactionStore = create<ITransactionStore>((set, get) => ({
 
   deleteTransaction: async (id: string) => {
     try {
-      await fetch(`/api/transaction/${id}`, { method: "DELETE" });
+      await fetch(`${API_URL}/api/transaction/${id}`, { method: "DELETE" });
       set((state) => ({
         userTransactions: state.userTransactions.filter(
           (item) => item.id !== id,

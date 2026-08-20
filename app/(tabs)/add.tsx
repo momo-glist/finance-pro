@@ -1,19 +1,22 @@
 import { useTransactionStore } from "@/store/useTransactionsStore";
-import { ICategoryItem } from "@/store/useTransactionsStore.types";
+import {
+    ICategoryItem,
+    ITransactionType,
+} from "@/store/useTransactionsStore.types";
 import { CATEGORY_KEY, MAP_CATEGORY_TO_ICON } from "@/utils/constants";
 import { LinearGradient } from "expo-linear-gradient";
 import { router, useLocalSearchParams } from "expo-router";
 import React, { useEffect, useState } from "react";
 import {
-  ActivityIndicator,
-  Alert,
-  Image,
-  Modal,
-  Pressable,
-  ScrollView,
-  Text,
-  TextInput,
-  View,
+    ActivityIndicator,
+    Alert,
+    Image,
+    Modal,
+    Pressable,
+    ScrollView,
+    Text,
+    TextInput,
+    View,
 } from "react-native";
 import SafeAreaView from "../components/SafeAreaView";
 
@@ -21,24 +24,27 @@ const AddScreen = () => {
   const {
     id: paramsId,
     title: paramsTitle,
-    type: paramsType,
-    category,
+    type,
+    category_id,
     amount: paramsAmount,
     expense_date,
   } = useLocalSearchParams<{
     id: string;
     title: string;
-    type: string;
+    type: ITransactionType;
     amount: string;
     expense_date: string;
-    category: ICategoryItem;
+    category_id: string;
   }>();
 
   const [amount, setAmount] = useState<string>(paramsAmount || "");
   const [title, setTitle] = useState(paramsTitle || "");
+  const [selectedType, setSelectedType] = useState<ITransactionType | string>(
+    type || "",
+  );
   const [selectedCategory, setSelectedCategory] = useState<
     ICategoryItem | string
-  >(category || "");
+  >(category_id || "");
   const [date, setDate] = useState(expense_date || "");
   const { addTransaction, updateTransaction } = useTransactionStore();
   const [loading, setLoading] = useState(false);
@@ -62,7 +68,7 @@ const AddScreen = () => {
   };
 
   const handleAddExpense = async () => {
-    if (!title || !selectedCategory || !amount || !date) {
+    if (!title || !selectedType || !selectedCategory || !amount || !date) {
       Alert.alert("Erreur", "Sil vous plait renseigner tout le temps");
       return;
     }
@@ -76,14 +82,19 @@ const AddScreen = () => {
 
     await addTransaction({
       title,
-      category: selectedCategory as ICategoryItem,
+      type: selectedType as ITransactionType,
+      category_id: selectedCategory as string,
       amount: Number(amount),
-      expenseDate: formatDateForAPI(date),
+      transactionDate: formatDateForAPI(date),
     });
 
     setLoading(false);
 
-    Alert.alert("Bravoo", "Votres depense a été ajoutée", [
+    const message = selectedType === "expense" 
+      ? "Votre dépense a été ajoutée" 
+      : "Votre revenu a été ajoutée";
+
+    Alert.alert("Bravo", message, [
       {
         text: "Ajouter une autre",
         style: "cancel",
@@ -97,6 +108,7 @@ const AddScreen = () => {
 
     setAmount("");
     setTitle("");
+    setSelectedType("");
     setSelectedCategory("");
     setDate("");
   };
@@ -106,12 +118,17 @@ const AddScreen = () => {
 
     await updateTransaction(paramsId, {
       title,
-      category,
+      type: selectedType as ITransactionType,
+      category_id: selectedCategory as string,
       amount: Number(amount),
-      expenseDate: formatDateForAPI(date),
+      transactionDate: formatDateForAPI(date),
     });
 
-    Alert.alert("Bravoo", "Votres depense a été modifier", [
+    const message = selectedType === "expense" 
+      ? "Votre dépense a été modifiée" 
+      : "Votre revenu a été modifié";
+
+    Alert.alert("Bravo", message, [
       {
         text: "Ajouter une autre",
         style: "cancel",
@@ -131,10 +148,11 @@ const AddScreen = () => {
 
   useEffect(() => {
     (setTitle(paramsTitle),
-      setSelectedCategory(category),
+      setSelectedType(type),
+      setSelectedCategory(category_id),
       setAmount(paramsAmount),
       setDate(formatDateForDisplay(expense_date)));
-  }, [paramsTitle, paramsAmount, category, expense_date]);
+  }, [paramsTitle, type, paramsAmount, category_id, expense_date]);
 
   return (
     <SafeAreaView className="flex-1 dark:bg-cinder bg-magnolio">
@@ -247,7 +265,10 @@ const AddScreen = () => {
               }}
             >
               <Text className="text-center text-white font-medium text-[20px]">
-                {paramsId ? "Modifier la dépense" : "Ajouter la dépense"}
+                {paramsId 
+                  ? (selectedType === "expense" ? "Modifier la dépense" : "Modifier le revenu")
+                  : (selectedType === "expense" ? "Ajouter la dépense" : "Ajouter le revenu")
+                }
               </Text>
             </LinearGradient>
           </Pressable>
