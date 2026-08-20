@@ -213,18 +213,18 @@ const getCategoryWiseData = (data: ITransactionItem[]) => {
   const categoryData: Record<string, ITransactionItem[]> = {};
 
   data.forEach((item) => {
-    if (!categoryData[item.category]) {
-      categoryData[item.category] = [];
+    if (!categoryData[item.category_id]) {
+      categoryData[item.category_id] = [];
     }
 
-    categoryData[item.category].push(item);
+    categoryData[item.category_id].push(item);
   });
 
-  const chartData = Object.entries(categoryData).map(([category, transactions]) => {
+  const chartData = Object.entries(categoryData).map(([category_id, transactions]) => {
     const total = transactions.reduce((sum, item) => sum + Number(item.amount || 0), 0);
 
     return {
-      label: category,
+      label: category_id,
       value: total,
     };
   });

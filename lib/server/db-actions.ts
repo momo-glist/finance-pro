@@ -1,4 +1,4 @@
-import { and, desc, eq } from "drizzle-orm";
+import { desc, eq } from "drizzle-orm";
 import { db } from "./db/client";
 import { categories, transactions, users } from "./db/schema";
 
@@ -73,30 +73,12 @@ export const createTransaction = async (data: {
   userId: string;
   title: string;
   type: "income" | "expense";
-  category: string;
+  category_id: string;
   amount: number;
   transaction_date: string;
   categoryIcon?: string;
+  categoryName?: string;
 }) => {
-  // Vérifier si la catégorie existe déjà pour cet utilisateur
-  const existingCategory = await db
-    .select()
-    .from(categories)
-    .where(and(eq(categories.name, data.category), eq(categories.user_id, data.userId)))
-    .limit(1);
-
-  // Si la catégorie n'existe pas, la créer automatiquement
-  if (!existingCategory || existingCategory.length === 0) {
-    const defaultIcon = data.categoryIcon || (data.type === "income" ? "trending-up" : "trending-down");
-    await db.insert(categories).values({
-      id: crypto.randomUUID(),
-      user_id: data.userId,
-      name: data.category,
-      type: data.type,
-      icon: defaultIcon,
-    });
-  }
-
   const [transaction] = await db
     .insert(transactions)
     .values({
@@ -104,7 +86,7 @@ export const createTransaction = async (data: {
       user_id: data.userId,
       title: data.title,
       type: data.type,
-      category: data.category,
+      category_id: data.category_id,
       amount: data.amount,
       transaction_date: data.transaction_date,
     })
@@ -118,7 +100,7 @@ export const updateTransaction = async (
   data: {
     title?: string;
     type?: "income" | "expense";
-    category?: string;
+    category_id?: string;
     amount?: number;
     transaction_date?: string;
   },

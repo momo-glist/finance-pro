@@ -1,22 +1,23 @@
-import { deleteExpense, updateExpense } from "@/lib/server/db-actions";
+import { deleteTransaction, updateTransaction } from "@/lib/server/db-actions";
 
 export async function PATH(request: Request, { id }: { id: string }) {
   try {
     const body = await request.json();
-    const { title, category, amount, expense_date } = body || {};
+    const { title, type, category, amount, transaction_date } = body || {};
 
-    const updateExpenseItem = await updateExpense(id, {
+    const updateTransactionItem = await updateTransaction(id, {
       title,
+      type,
       category,
       amount,
-      expense_date,
+      transaction_date,
     });
 
-    if (!updateExpense) {
-      return Response.json({ error: "Dépense non trouvé", status: 404 });
+    if (!updateTransaction) {
+      return Response.json({ error: "Transaction non trouvé", status: 404 });
     }
 
-    return Response.json({ updateExpenseItem });
+    return Response.json({ updateTransactionItem });
   } catch (error) {
     const errorMessage =
       error instanceof Error ? error.message : "Failed to update the expense";
@@ -27,7 +28,7 @@ export async function PATH(request: Request, { id }: { id: string }) {
 
 export async function DELETE(_request: Request, { id }: { id: string }) {
   try {
-    await deleteExpense(id);
+    await deleteTransaction(id);
 
     return Response.json({ ok: true, status: 204 });
   } catch (error) {

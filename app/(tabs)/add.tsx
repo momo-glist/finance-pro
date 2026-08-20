@@ -1,5 +1,5 @@
-import { useExpenseStore } from "@/store/useTransactionsStore";
-import { IExpenseCategory } from "@/store/useTransactionsStore.types";
+import { useTransactionStore } from "@/store/useTransactionsStore";
+import { ICategoryItem } from "@/store/useTransactionsStore.types";
 import { CATEGORY_KEY, MAP_CATEGORY_TO_ICON } from "@/utils/constants";
 import { LinearGradient } from "expo-linear-gradient";
 import { router, useLocalSearchParams } from "expo-router";
@@ -21,24 +21,26 @@ const AddScreen = () => {
   const {
     id: paramsId,
     title: paramsTitle,
+    type: paramsType,
     category,
     amount: paramsAmount,
     expense_date,
   } = useLocalSearchParams<{
     id: string;
     title: string;
+    type: string;
     amount: string;
     expense_date: string;
-    category: IExpenseCategory;
+    category: ICategoryItem;
   }>();
 
   const [amount, setAmount] = useState<string>(paramsAmount || "");
   const [title, setTitle] = useState(paramsTitle || "");
   const [selectedCategory, setSelectedCategory] = useState<
-    IExpenseCategory | string
+    ICategoryItem | string
   >(category || "");
   const [date, setDate] = useState(expense_date || "");
-  const { addExpense, updateExpense } = useExpenseStore();
+  const { addTransaction, updateTransaction } = useTransactionStore();
   const [loading, setLoading] = useState(false);
 
   const formatDateForAPI = (inputDate: string) => {
@@ -72,9 +74,9 @@ const AddScreen = () => {
 
     setLoading(true);
 
-    await addExpense({
+    await addTransaction({
       title,
-      category: selectedCategory as IExpenseCategory,
+      category: selectedCategory as ICategoryItem,
       amount: Number(amount),
       expenseDate: formatDateForAPI(date),
     });
@@ -102,7 +104,7 @@ const AddScreen = () => {
   const handleUpdateExpense = async () => {
     setLoading(true);
 
-    await updateExpense(paramsId, {
+    await updateTransaction(paramsId, {
       title,
       category,
       amount: Number(amount),

@@ -1,6 +1,9 @@
 import { convertKeysToCamelCase } from "@/lib/app.helpers";
 import { create } from "zustand";
-import { ITransactionInpute, ITransactionStore } from "./useTransactionsStore.types";
+import {
+    ITransactionInpute,
+    ITransactionStore,
+} from "./useTransactionsStore.types";
 
 export const useTransactionStore = create<ITransactionStore>((set, get) => ({
   userTransactions: [],
@@ -19,14 +22,14 @@ export const useTransactionStore = create<ITransactionStore>((set, get) => ({
 
   addTransaction: async (input: ITransactionInpute) => {
     try {
-      const { title, type, category, amount, transactionDate } = input || {};
+      const { title, type, category_id, amount, transactionDate } = input || {};
       const response = await fetch("/api/transaction", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           title,
           type,
-          category,
+          category_id,
           amount,
           transaction_date: transactionDate,
         }),
@@ -47,14 +50,14 @@ export const useTransactionStore = create<ITransactionStore>((set, get) => ({
 
   updateTransaction: async (id: string, input: ITransactionInpute) => {
     try {
-      const { title, type, category, amount, transactionDate } = input || {};
+      const { title, type, category_id, amount, transactionDate } = input || {};
       const response = await fetch("/api/transaction", {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           title,
           type,
-          category,
+          category_id,
           amount,
           transaction_date: transactionDate,
         }),
@@ -78,7 +81,9 @@ export const useTransactionStore = create<ITransactionStore>((set, get) => ({
     try {
       await fetch(`/api/transaction/${id}`, { method: "DELETE" });
       set((state) => ({
-        userTransactions: state.userTransactions.filter((item) => item.id !== id),
+        userTransactions: state.userTransactions.filter(
+          (item) => item.id !== id,
+        ),
       }));
     } catch (error) {
       console.log("Failed to delete transaction:", error);

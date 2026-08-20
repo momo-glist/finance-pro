@@ -6,7 +6,7 @@ export type ITransactionItem = {
   user_id: string;
   title: string;
   type: ITransactionType;
-  category: string;
+  category_id: string;
   amount: number;
   transaction_date: string;
   created_at: string;
@@ -18,7 +18,7 @@ export type ITransactionsResponse = { transaction: ITransactionItem };
 export type ITransactionInpute = {
   title: string;
   type: ITransactionType;
-  category: string;
+  category_id: string;
   amount: number;
   transactionDate: string;
 };
