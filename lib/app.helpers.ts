@@ -1,8 +1,8 @@
 import {
-    IGenericStringMap,
-    IToCamelCase,
-    ITransactionItem,
-    MonthData,
+  IGenericStringMap,
+  IToCamelCase,
+  ITransactionItem,
+  MonthData,
 } from "@/store/useTransactionsStore.types";
 
 const toCamalCase: IToCamelCase = (str) => {
@@ -65,8 +65,9 @@ const getcurrentMonthExpense = (data: ITransactionItem[]): number => {
 
   data.forEach((transaction: ITransactionItem) => {
     if (transaction.type !== "expense") return;
-    
-    const dateStr = (transaction as any).transactionDate || transaction.transaction_date;
+
+    const dateStr =
+      (transaction as any).transactionDate || transaction.transaction_date;
     const date = new Date(dateStr);
 
     if (
@@ -92,8 +93,9 @@ const getcurrentMonthIncome = (data: ITransactionItem[]): number => {
 
   data.forEach((transaction: ITransactionItem) => {
     if (transaction.type !== "income") return;
-    
-    const dateStr = (transaction as any).transactionDate || transaction.transaction_date;
+
+    const dateStr =
+      (transaction as any).transactionDate || transaction.transaction_date;
     const date = new Date(dateStr);
 
     if (
@@ -105,6 +107,32 @@ const getcurrentMonthIncome = (data: ITransactionItem[]): number => {
   });
 
   return currentMonthIncome;
+};
+
+const getCurrentMonthBalance = (data: ITransactionItem[]): number => {
+  if (!data || data.length === 0) {
+    return 0;
+  }
+
+  let currentMonthBalance = 0;
+  const currentDate = new Date();
+  const currentMonth = currentDate.getMonth();
+  const currentYear = currentDate.getFullYear();
+
+  data.forEach((transaction: ITransactionItem) => {
+    const dateStr =
+      (transaction as any).transactionDate || transaction.transaction_date;
+    const date = new Date(dateStr);
+
+    if (
+      date.getMonth() === currentMonth &&
+      date.getFullYear() === currentYear
+    ) {
+      currentMonthBalance += Number(transaction.amount || 0);
+    }
+  });
+
+  return currentMonthBalance;
 };
 
 const getMonthWiseChartData = (data: ITransactionItem[]) => {
@@ -149,7 +177,10 @@ const getIncomeVsExpenseChartData = (data: ITransactionItem[]) => {
     return [];
   }
 
-  const monthlyMap: Record<number, { income: number; expense: number; label: string; monthIndex: number }> = {};
+  const monthlyMap: Record<
+    number,
+    { income: number; expense: number; label: string; monthIndex: number }
+  > = {};
 
   data.forEach((item) => {
     const dateStr = (item as any).transactionDate || item.transaction_date;
@@ -204,7 +235,8 @@ const getTopCategory = (transactions: ITransactionItem[]) => {
     }
   });
 
-  topCategory.percentage = totalSum > 0 ? (topCategory.amount / totalSum) * 100 : 0;
+  topCategory.percentage =
+    totalSum > 0 ? (topCategory.amount / totalSum) * 100 : 0;
 
   return topCategory;
 };
@@ -220,27 +252,33 @@ const getCategoryWiseData = (data: ITransactionItem[]) => {
     categoryData[item.category_id].push(item);
   });
 
-  const chartData = Object.entries(categoryData).map(([category_id, transactions]) => {
-    const total = transactions.reduce((sum, item) => sum + Number(item.amount || 0), 0);
+  const chartData = Object.entries(categoryData).map(
+    ([category_id, transactions]) => {
+      const total = transactions.reduce(
+        (sum, item) => sum + Number(item.amount || 0),
+        0,
+      );
 
-    return {
-      label: category_id,
-      value: total,
-    };
-  });
+      return {
+        label: category_id,
+        value: total,
+      };
+    },
+  );
 
   return chartData;
 };
 
 export {
-    convertKeysToCamelCase,
-    getCategoryWiseData,
-    getcurrentMonthExpense,
-    getcurrentMonthIncome,
-    getIncomeVsExpenseChartData,
-    getMonthWiseChartData,
-    getTopCategory,
-    getTotalExpense,
-    getTotalIncome
+  convertKeysToCamelCase,
+  getCategoryWiseData,
+  getCurrentMonthBalance,
+  getcurrentMonthExpense,
+  getcurrentMonthIncome,
+  getIncomeVsExpenseChartData,
+  getMonthWiseChartData,
+  getTopCategory,
+  getTotalExpense,
+  getTotalIncome,
 };
 

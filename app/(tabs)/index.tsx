@@ -1,9 +1,11 @@
 import {
+  getCurrentMonthBalance,
   getcurrentMonthExpense,
+  getcurrentMonthIncome,
   getMonthWiseChartData,
-  getTotalExpense,
 } from "@/lib/app.helpers";
 import { useTransactionStore } from "@/store/useTransactionsStore";
+import { useUser } from "@clerk/expo";
 import { router } from "expo-router";
 import { useEffect, useState } from "react";
 import { Pressable, ScrollView, Text, View } from "react-native";
@@ -16,6 +18,8 @@ export default function HomeScreen() {
   const [chartData, setChartData] =
     useState<{ label: string; value: number }[]>();
 
+  const { user } = useUser();
+
   useEffect(() => {
     const monthData = getMonthWiseChartData(userTransactions);
     setChartData(monthData);
@@ -24,21 +28,42 @@ export default function HomeScreen() {
   return (
     <SafeAreaView className="bg-magnolia dark:bg-cinder flex-1">
       <ScrollView contentContainerStyle={{ padding: 16 }}>
-        <View className="dark:bg-shark bg-persian-blue rounded-xl px-6 py-8 gap-1 shadow-xs">
+        <View className="mb-6">
           <Text className="dark:text-gray-suite text-white text-sm font-medium">
-            Dépenses
+            Hello, {user?.firstName} {user?.lastName}
           </Text>
-          <Text className="dark:text-melrose text-white font-extrabold text-[3rem]">
-            {getTotalExpense(userTransactions).toFixed(2)} F
+        </View>
+        <View className="dark:bg-shark bg-persian-blue rounded-2xl px-6 py-8 gap-1 shadow-xs">
+          <Text className="dark:text-gray-suit text-white text-sm font-medium">
+            Balance
           </Text>
 
-          <View className="dark:bg-shark-2 bg-royal-blue p-4 rounded-lg gap-1 mt-6 border border-athens-gray/10 shadow">
-            <Text className="dark:text-gray-suite text-white text-sm font-medium">
-              Dépenses mensuelles
-            </Text>
-            <Text className="dark:text-athens-gray text-white font-bold text-3xl">
-              {getcurrentMonthExpense(userTransactions)} F
-            </Text>
+          <Text className="dark:text-melrose text-white font-extrabold text-[3rem]">
+            {getCurrentMonthBalance(userTransactions).toFixed(2)} F
+          </Text>
+
+          <View className="flex-row mt-6">
+            {/* Revenue */}
+            <View className="flex-1 gap-1">
+              <Text className="dark:text-gray-suit text-white text-sm font-medium">
+                Revenue
+              </Text>
+
+              <Text className="dark:text-athens-gray text-white font-bold text-2xl">
+                {getcurrentMonthIncome(userTransactions).toFixed(2)} F
+              </Text>
+            </View>
+
+            {/* Dépense */}
+            <View className="flex-1 gap-1 items-end">
+              <Text className="dark:text-gray-suit text-white text-sm font-medium">
+                Dépense
+              </Text>
+
+              <Text className="dark:text-athens-gray text-white font-bold text-2xl">
+                {getcurrentMonthExpense(userTransactions).toFixed(2)} F
+              </Text>
+            </View>
           </View>
         </View>
 
