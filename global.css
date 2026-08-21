@@ -5,18 +5,33 @@
 @import "nativewind/theme";
 
 @theme {
-  --color-magnolia: #faf8ff;
-  --color-cinder: #11131b;
-  --color-athens-gray: #e1e1ed;
-  --color-gray-suit: #c8c4d6;
-  --color-gun-powder: #464555;
-  --color-ebony: #131b2e;
-  --color-shark: #191b23;
-  --color-melrose: #c5c0ff;
-  --color-shark-2: #1d1f28;
-  --color-persian-blue: #3525cd;
-  --color-royal-blue: #584de0;
-  --color-shark-3: #282a32;
-  --color-hawkes-blue: #dae2fd;
-  --color-titan-white: #f8f8ff;
+  --color-background: #f8f7fc;
+  --color-surface: #ffffff;
+  --color-surface-secondary: #f5edf3;
+
+  --color-primary: #843bee;
+  --color-primary-light: #d3bbfc;
+
+  --color-accent: #f75f40;
+  --color-accent-light: #fff0ed;
+
+  --color-text: #484b6a;
+  --color-text-secondary: #7f8085;
+
+  --color-success: #35a81f;
+
+  --color-dark-background: #111018;
+  --color-dark-surface: #1b1924;
+  --color-dark-surface-secondary: #252230;
+
+  --color-dark-primary: #9b5cff;
+  --color-dark-primary-light: #b98aff;
+
+  --color-dark-accent: #ff755b;
+  --color-dark-accent-light: #3a2525;
+
+  --color-dark-text: #f5f3fa;
+  --color-dark-text-secondary: #a8a4b3;
+
+  --color-dark-success: #55c93d;
 }

@@ -155,39 +155,39 @@ const AddScreen = () => {
   }, [paramsTitle, type, paramsAmount, category_id, expense_date]);
 
   return (
-    <SafeAreaView className="flex-1 dark:bg-cinder bg-magnolio">
+    <SafeAreaView className="flex-1 dark:bg-dark-background bg-background">
       <ScrollView contentContainerStyle={{ padding: 16 }}>
         <View className="items-center justify-center mt-5">
-          <Text className="dark:text-gray-suit text-gray-500 font-semibold text-sm">
+          <Text className="dark:text-dark-text-secondary text-text-secondary font-semibold text-sm">
             ENTRÉ LE MONTANT
           </Text>
           <View className="flex-row items-center mt-4 gap-6 w-[95%]">
             <TextInput
-              className="text-[3.75rem] w-[85%] font-bold text-black dark:text-melrose"
+              className="text-[3.75rem] w-[85%] font-bold text-text dark:text-dark-text"
               value={amount}
               onChangeText={setAmount}
               keyboardType="numeric"
             />
-            <Text className="text-[3rem] font-bold dark:text-white text-percian-blue ">
+            <Text className="text-[3rem] font-bold dark:text-dark-text text-accent">
               F
             </Text>
           </View>
         </View>
 
         <View className="gap-2 mt-4">
-          <Text className="dark:text-gray-suit text-gray-500 font-semibold text-sm">
+          <Text className="dark:text-dark-text-secondary text-text-secondary font-semibold text-sm">
             TITRE
           </Text>
           <TextInput
-            className="h-[4.3rem] p-4 text-[1.6rem] font-bold dark:bg-shark bg-titan-white/50 
-            rounded-xl text-black dark:text-melrose"
+            className="h-[4.3rem] p-4 text-[1.6rem] font-bold dark:bg-dark-surface bg-surface 
+            rounded-xl text-text dark:text-dark-text"
             value={title}
             onChangeText={setTitle}
           />
         </View>
 
         <View className="mt-2 gap-4">
-          <Text className="dark:text-gray-suit text-gray-500 font-semibold text-sm">
+          <Text className="dark:text-dark-text-secondary text-text-secondary font-semibold text-sm">
             CATEGORIE
           </Text>
           <View className="gap-4 flex-row flex-wrap mt-2">
@@ -195,12 +195,12 @@ const AddScreen = () => {
               return (
                 <Text
                   key={category}
-                  className={`text-black dark:text-melrose font-medium rounded-full
+                  className={`text-text dark:text-dark-text font-medium rounded-full
                 px-3 py-6
                 ${
                   selectedCategory === category
-                    ? "bg-royal-blue dark:text-white"
-                    : "dark:bg-shark bg-titan-white/50"
+                    ? "bg-accent dark:text-white"
+                    : "dark:bg-dark-surface bg-surface"
                 }`}
                   onPress={() => setSelectedCategory(category)}
                 >
@@ -211,7 +211,7 @@ const AddScreen = () => {
           </View>
 
           <View className="mt-2 gap-4">
-            <Text className="dark:text-gray-suit text-gray-500 font-semibold text-sm">
+            <Text className="dark:text-dark-text-secondary text-text-secondary font-semibold text-sm">
               ICONE
             </Text>
             <View className="flex-row gap-6 items-center">
@@ -219,10 +219,10 @@ const AddScreen = () => {
                 return (
                   <View
                     key={category}
-                    className={`dark:bg-chark-3 bg-shark-3/10 p-2 rounded-lg
+                    className={`dark:bg-dark-surface-secondary bg-surface-secondary p-2 rounded-lg
                 ${
                   selectedCategory === category
-                    ? "border border-royal-blue/70 dark:border-royal-blue"
+                    ? "border border-accent/70 dark:border-accent"
                     : ""
                 }`}
                   >
@@ -237,12 +237,12 @@ const AddScreen = () => {
           </View>
 
           <View className="mt-2 gap-4">
-            <Text className="dark:text-gray-suit text-gray-500 font-semibold text-sm">
+            <Text className="dark:text-dark-text-secondary text-text-secondary font-semibold text-sm">
               Date (JJ/MM/AAAA)
             </Text>
             <TextInput
-              className="h-16 p-4 text-[1.6rem] font-bold dark:bg-shark bg-titan-white/50
-            rounded-xl text-black dark:text-melrose"
+              className="h-16 p-4 text-[1.6rem] font-bold dark:bg-dark-surface bg-surface
+            rounded-xl text-text dark:text-dark-text"
               value={date}
               onChangeText={setDate}
               placeholder="01/01/2026"
@@ -254,7 +254,7 @@ const AddScreen = () => {
             className="rounded-xl overflow-hidden active:opacity-80 mt-14"
           >
             <LinearGradient
-              colors={["#C5C0FF", "#5A4FCF"]}
+              colors={["#fff0ed", "#f75f40"]}
               start={{ x: 0, y: 0 }}
               end={{ x: 1, y: 0 }}
               style={{

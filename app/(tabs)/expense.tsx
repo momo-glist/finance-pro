@@ -38,8 +38,8 @@ const ExpenseScreen = () => {
 
   const renderCategoryWiseFunding = () => {
     return (
-      <View className="rounded-xl dark:bg-shark bg-white px-6 py-6 gap-6 mt-8">
-        <Text className="dark:text-gray-suite text-shark text-xl font-bold">
+      <View className="rounded-xl dark:bg-dark-surface bg-surface px-6 py-6 gap-6 mt-8">
+        <Text className="dark:text-dark-text-secondary text-text text-xl font-bold">
           Catégorie
         </Text>
 
@@ -48,18 +48,18 @@ const ExpenseScreen = () => {
           return (
             <View className="gap-2" key={index}>
               <View className="flex-row jutify-betwenn items-center">
-                <Text className="text-base font-semibold dark:text-white w-46">
+                <Text className="text-base font-semibold dark:text-dark-text w-46">
                   {item.label}
                 </Text>
-                <Text className="text-base font-semibold dark:text-melrose text-gun-powder ">
+                <Text className="text-base font-semibold dark:text-dark-primary-light text-text-secondary">
                   {item.value}F {percentage.toFixed(0)}%
                 </Text>
               </View>
 
-              <View className="w-full h-4.5 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
+              <View className="w-full h-4.5 bg-surface-secondary dark:bg-dark-surface-secondary rounded-full overflow-hidden">
                 <View
                   style={{ width: `${percentage}%` }}
-                  className="h-full bg-royal-blue rounded-full"
+                  className="h-full bg-accent rounded-full"
                 ></View>
               </View>
             </View>
@@ -70,24 +70,24 @@ const ExpenseScreen = () => {
   };
 
   return (
-    <SafeAreaView className="flex-1 dark:bg-cinder bg-magnolia">
+    <SafeAreaView className="flex-1 dark:bg-dark-background bg-background">
       <ScrollView contentContainerStyle={{ padding: 16 }}>
-        <View className="rounded-xl bg-melrose/70 dark:bg-shark-2 px-6 py-6">
+        <View className="rounded-xl bg-primary-light/70 dark:bg-dark-surface-secondary px-6 py-6">
           <View className="slef-start">
-            <Text className="text-white px-3 bg-royal-blue text-base font-medium rounded-full py-1">
+            <Text className="text-white px-3 bg-accent text-base font-medium rounded-full py-1">
               Top Categorie
             </Text>
           </View>
           <View className="mt-4">
-            <Text className="dark:text-white text-black text-3xl font-semibold mt-1">
+            <Text className="dark:text-dark-text text-text text-3xl font-semibold mt-1">
               {getTopCategory(userTransactions).label}
             </Text>
-            <Text className="mt-3 dark:text-white text-black">
+            <Text className="mt-3 dark:text-dark-text text-text">
               Contribue à {""}
               {getTopCategory(userTransactions).percentage.toFixed(2)}% de vos
               dépenses total
             </Text>
-            <Text className="text-4xl text-persian-blue dark:text-melrose mt-6 font-bold">
+            <Text className="text-4xl text-accent dark:text-dark-primary-light mt-6 font-bold">
               {getTopCategory(userTransactions).amount.toFixed(2)} F
             </Text>
           </View>
@@ -95,8 +95,8 @@ const ExpenseScreen = () => {
 
         {renderCategoryWiseFunding()}
 
-        <View className="rounded-xl bg-white dark:bg-shark px-6 py-6 gap-6 mt-8">
-          <Text className="dark:text-gray-suit text-shark text-xl font-bold">
+        <View className="rounded-xl bg-surface dark:bg-dark-surface px-6 py-6 gap-6 mt-8">
+          <Text className="dark:text-dark-text-secondary text-text text-xl font-bold">
             Toutes vos transactions
           </Text>
           <View className="gap-10">

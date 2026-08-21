@@ -16,51 +16,51 @@ const ProfileScreen = () => {
 
   if (!isLoaded) {
     return (
-      <SafeAreaView className="flex-1 dark:bg-cinder bg-magnolia">
-        <Text className="dark:text-white text-black">Chargement...</Text>
+      <SafeAreaView className="flex-1 dark:bg-dark-background bg-background">
+        <Text className="dark:text-dark-text text-text">Chargement...</Text>
       </SafeAreaView>
     );
   }
 
   return (
-    <SafeAreaView className="flex-1 dark:bg-cinder bg-magnolia">
+    <SafeAreaView className="flex-1 dark:bg-dark-background bg-background">
       <ScrollView contentContainerStyle={{ padding: 16 }}>
         <View className="items-center mb-8">
-          <View className="w-20 h-20 rounded-full bg-royal-blue justify-center items-center mb-4">
+          <View className="w-20 h-20 rounded-full bg-accent justify-center items-center mb-4">
             <Text className="text-3xl font-bold text-white">
               {user?.firstName?.[0] || user?.emailAddresses?.[0]?.emailAddress[0] || "?"}
             </Text>
           </View>
-          <Text className="text-2xl font-bold dark:text-white text-black mb-1">
+          <Text className="text-2xl font-bold dark:text-dark-text text-text mb-1">
             {user?.firstName} {user?.lastName}
           </Text>
-          <Text className="text-base dark:text-gray-suit text-gun-powder">
+          <Text className="text-base dark:text-dark-text-secondary text-text-secondary">
             {user?.emailAddresses?.[0]?.emailAddress}
           </Text>
         </View>
 
-        <View className="rounded-xl dark:bg-shark bg-white px-6 py-6 mb-6">
-          <Text className="dark:text-gray-suit text-shark text-xl font-bold mb-4">
+        <View className="rounded-xl dark:bg-dark-surface bg-surface px-6 py-6 mb-6">
+          <Text className="dark:text-dark-text-secondary text-text text-xl font-bold mb-4">
             Informations personnelles
           </Text>
           
           <View className="flex-row justify-between items-center py-3 border-b border-gray-200 dark:border-gray-700">
-            <Text className="text-base dark:text-gray-suit text-gun-powder">Prénom</Text>
-            <Text className="text-base font-semibold dark:text-white text-black">
+            <Text className="text-base dark:text-dark-text-secondary text-text-secondary">Prénom</Text>
+            <Text className="text-base font-semibold dark:text-dark-text text-text">
               {user?.firstName || "Non renseigné"}
             </Text>
           </View>
           
           <View className="flex-row justify-between items-center py-3 border-b border-gray-200 dark:border-gray-700">
-            <Text className="text-base dark:text-gray-suit text-gun-powder">Nom</Text>
-            <Text className="text-base font-semibold dark:text-white text-black">
+            <Text className="text-base dark:text-dark-text-secondary text-text-secondary">Nom</Text>
+            <Text className="text-base font-semibold dark:text-dark-text text-text">
               {user?.lastName || "Non renseigné"}
             </Text>
           </View>
           
           <View className="flex-row justify-between items-center py-3">
-            <Text className="text-base dark:text-gray-suit text-gun-powder">Email</Text>
-            <Text className="text-base font-semibold dark:text-white text-black">
+            <Text className="text-base dark:text-dark-text-secondary text-text-secondary">Email</Text>
+            <Text className="text-base font-semibold dark:text-dark-text text-text">
               {user?.emailAddresses?.[0]?.emailAddress}
             </Text>
           </View>
