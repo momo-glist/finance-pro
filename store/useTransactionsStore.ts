@@ -24,6 +24,10 @@ export const useTransactionStore = create<ITransactionStore>((set, get) => ({
   addTransaction: async (input: ITransactionInpute) => {
     try {
       const { title, type, category_id, amount, transactionDate } = input || {};
+      const userId = (input as any).user_id;
+      
+      console.log("Creating transaction with data:", { title, type, category_id, amount, transactionDate, userId });
+      
       const response = await fetch(`${API_URL}/api/transaction`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -33,17 +37,22 @@ export const useTransactionStore = create<ITransactionStore>((set, get) => ({
           category_id,
           amount,
           transaction_date: transactionDate,
+          userId,
         }),
       });
 
       const data = await response.json();
+      console.log("API response:", data);
 
-      set((state) => ({
-        userTransactions: [
-          convertKeysToCamelCase(data.createTransactionItem),
-          ...state.userTransactions,
-        ],
-      }));
+      if (!response.ok) {
+        console.error("API error:", data);
+        return;
+      }
+
+      // Refresh transactions after creation
+      if (userId) {
+        await get().fetchTransactions(userId);
+      }
     } catch (error) {
       console.log("Failed to add transaction:", error);
     }

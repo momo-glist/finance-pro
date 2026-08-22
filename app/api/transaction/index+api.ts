@@ -1,4 +1,5 @@
-import { createTransaction, getAllTransactions } from "@/lib/server/db-actions";
+import { createCategory, createTransaction, getAllTransactions, getCategories } from "@/lib/server/db-actions";
+import { MAP_CATEGORY_TO_ICON } from "@/utils/constants";
 
 export async function GET(request: Request) {
   try {
@@ -39,11 +40,28 @@ export async function POST(request: Request) {
       });
     }
 
-    const createTransactionItem = createTransaction({
+    // Check if category exists, if not create it
+    const existingCategories = await getCategories(userId);
+    const existingCategory = existingCategories.find(cat => cat.name === category_id);
+    
+    let finalCategoryId = category_id;
+    
+    if (!existingCategory) {
+      // Create the category
+      const newCategory = await createCategory({
+        userId,
+        name: category_id,
+        type: type as "income" | "expense",
+        icon: MAP_CATEGORY_TO_ICON[category_id as keyof typeof MAP_CATEGORY_TO_ICON] || "",
+      });
+      finalCategoryId = newCategory.id;
+    }
+
+    const createTransactionItem = await createTransaction({
       userId,
       title,
       type,
-      category_id,
+      category_id: finalCategoryId,
       amount,
       transaction_date: transaction_date,
     });

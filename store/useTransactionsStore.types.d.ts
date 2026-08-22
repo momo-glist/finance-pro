@@ -11,6 +11,7 @@ export type ITransactionItem = {
   transaction_date: string;
   created_at: string;
   updated_at: string;
+  category_name?: string;
 };
 
 export type ITransactionsResponse = { transaction: ITransactionItem };

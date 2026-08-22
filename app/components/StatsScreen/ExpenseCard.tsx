@@ -9,8 +9,8 @@ const ExpenseCard = ({ expense }: { expense: ITransactionItem }) => {
       <View className="flex-row items-start gap-4">
         <View className="dark:bg-dark-surface-secondary bg-surface-secondary p-2 rounded-lg">
           <Image
-            source={{ uri: MAP_CATEGORY_TO_ICON[expense.category_id] }}
-            style={{ width: 20, height: 20 }}
+            source={{ uri: MAP_CATEGORY_TO_ICON[(expense as any).categoryName || expense.category_id] }}
+            style={{ width: 32, height: 32 }}
           />
         </View>
         <View>
@@ -21,7 +21,7 @@ const ExpenseCard = ({ expense }: { expense: ITransactionItem }) => {
             {getFullDate(expense)}
           </Text>
           <Text className="text-text-secondary dark:text-dark-text-secondary">
-            {expense.category_id}
+            {(expense as any).categoryName || expense.category_id}
           </Text>
         </View>
       </View>

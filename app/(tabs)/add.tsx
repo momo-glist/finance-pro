@@ -1,10 +1,9 @@
 import { useTransactionStore } from "@/store/useTransactionsStore";
-import {
-    ICategoryItem,
-    ITransactionType,
-} from "@/store/useTransactionsStore.types";
+import { ITransactionType } from "@/store/useTransactionsStore.types";
 import { CATEGORY_KEY, MAP_CATEGORY_TO_ICON } from "@/utils/constants";
-import { LinearGradient } from "expo-linear-gradient";
+import { useUser } from "@clerk/expo";
+import { Ionicons } from "@expo/vector-icons";
+import DateTimePicker from "@react-native-community/datetimepicker";
 import { router, useLocalSearchParams } from "expo-router";
 import React, { useEffect, useState } from "react";
 import {
@@ -21,6 +20,7 @@ import {
 import SafeAreaView from "../components/SafeAreaView";
 
 const AddScreen = () => {
+  const { user } = useUser();
   const {
     id: paramsId,
     title: paramsTitle,
@@ -42,29 +42,44 @@ const AddScreen = () => {
   const [selectedType, setSelectedType] = useState<ITransactionType | string>(
     type || "",
   );
-  const [selectedCategory, setSelectedCategory] = useState<
-    ICategoryItem | string
-  >(category_id || "");
-  const [date, setDate] = useState(expense_date || "");
+  const [selectedCategory, setSelectedCategory] = useState<string>(
+    category_id || "",
+  );
+  const [date, setDate] = useState<Date>(
+    expense_date ? new Date(expense_date) : new Date(),
+  );
+  const [showDatePicker, setShowDatePicker] = useState(false);
   const { addTransaction, updateTransaction } = useTransactionStore();
   const [loading, setLoading] = useState(false);
+  const [showCategoryModal, setShowCategoryModal] = useState(false);
 
-  const formatDateForAPI = (inputDate: string) => {
+  const formatDateForAPI = (inputDate: Date) => {
     if (!inputDate) return "";
-    const parts = inputDate.split("/");
-    if (parts.length === 3) {
-      return `${parts[2]}-${parts[1]}-${parts[0]}`;
-    }
-    return inputDate;
+    const year = inputDate.getFullYear();
+    const month = String(inputDate.getMonth() + 1).padStart(2, "0");
+    const day = String(inputDate.getDate()).padStart(2, "0");
+    return `${year}-${month}-${day}`;
   };
 
-  const formatDateForDisplay = (inputDate: string) => {
+  const formatDateForDisplay = (inputDate: Date) => {
     if (!inputDate) return "";
+    const day = String(inputDate.getDate()).padStart(2, "0");
+    const month = String(inputDate.getMonth() + 1).padStart(2, "0");
+    const year = inputDate.getFullYear();
+    return `${day}/${month}/${year}`;
+  };
+
+  const parseDateFromAPI = (inputDate: string) => {
+    if (!inputDate) return new Date();
     const parts = inputDate.split("-");
     if (parts.length === 3) {
-      return `${parts[2]}/${parts[1]}/${parts[0]}`;
+      return new Date(
+        parseInt(parts[2]),
+        parseInt(parts[1]) - 1,
+        parseInt(parts[0]),
+      );
     }
-    return inputDate;
+    return new Date();
   };
 
   const handleAddExpense = async () => {
@@ -86,23 +101,25 @@ const AddScreen = () => {
       category_id: selectedCategory as string,
       amount: Number(amount),
       transactionDate: formatDateForAPI(date),
-    });
+      user_id: user?.id,
+    } as any);
 
     setLoading(false);
 
-    const message = selectedType === "expense" 
-      ? "Votre dépense a été ajoutée" 
-      : "Votre revenu a été ajoutée";
+    const message =
+      selectedType === "expense"
+        ? "Votre dépense a été ajoutée"
+        : "Votre revenu a été ajoutée";
 
     Alert.alert("Bravo", message, [
       {
         text: "Ajouter une autre",
         style: "cancel",
-        onPress: () => router.push("/add"),
+        onPress: () => setTimeout(() => router.replace("/transactions"), 100),
       },
       {
         text: "Voir tout",
-        onPress: () => router.push("/expense"),
+        onPress: () => setTimeout(() => router.replace("/transactions"), 100),
       },
     ]);
 
@@ -110,7 +127,7 @@ const AddScreen = () => {
     setTitle("");
     setSelectedType("");
     setSelectedCategory("");
-    setDate("");
+    setDate(new Date());
   };
 
   const handleUpdateExpense = async () => {
@@ -124,51 +141,101 @@ const AddScreen = () => {
       transactionDate: formatDateForAPI(date),
     });
 
-    const message = selectedType === "expense" 
-      ? "Votre dépense a été modifiée" 
-      : "Votre revenu a été modifié";
+    const message =
+      selectedType === "expense"
+        ? "Votre dépense a été modifiée"
+        : "Votre revenu a été modifié";
 
     Alert.alert("Bravo", message, [
       {
         text: "Ajouter une autre",
         style: "cancel",
-        onPress: () => router.push("/add"),
+        onPress: () => setTimeout(() => router.replace("/transactions"), 100),
       },
       {
         text: "Voir tout",
-        onPress: () => router.push("/expense"),
+        onPress: () => setTimeout(() => router.replace("/transactions"), 100),
       },
     ]);
 
     setAmount("");
     setTitle("");
     setSelectedCategory("");
-    setDate("");
+    setDate(new Date());
   };
 
   useEffect(() => {
-    (setTitle(paramsTitle),
-      setSelectedType(type),
-      setSelectedCategory(category_id),
-      setAmount(paramsAmount),
-      setDate(formatDateForDisplay(expense_date)));
+    setTitle(paramsTitle);
+    setSelectedType(type);
+    setSelectedCategory(category_id);
+    setAmount(paramsAmount);
+    if (expense_date) {
+      setDate(parseDateFromAPI(expense_date));
+    }
   }, [paramsTitle, type, paramsAmount, category_id, expense_date]);
 
   return (
     <SafeAreaView className="flex-1 dark:bg-dark-background bg-background">
       <ScrollView contentContainerStyle={{ padding: 16 }}>
+        <View className="items-start mt-5">
+          <Text className="dark:text-dark-text-secondary text-text-secondary font-semibold text-xl">
+            Ajouté une transaction
+          </Text>
+        </View>
+        <View className="flex-row justify-center mt-4 gap-4">
+          <Pressable
+            className={`w-[45%] items-center justify-center py-4 rounded-3xl gap-2 ${
+              selectedType === "income" ? "bg-primary" : "bg-primary/20"
+            }`}
+            onPress={() => setSelectedType("income")}
+          >
+            <Ionicons
+              name="arrow-up"
+              size={24}
+              color={selectedType === "income" ? "#fff" : "#843bee"}
+            />
+            <Text
+              className={`font-medium ${
+                selectedType === "income" ? "text-white" : "text-primary"
+              }`}
+            >
+              Ajouté un revenu
+            </Text>
+          </Pressable>
+          <Pressable
+            className={`w-[45%] items-center justify-center py-4 rounded-3xl gap-2 ${
+              selectedType === "expense" ? "bg-accent" : "bg-accent/20"
+            }`}
+            onPress={() => setSelectedType("expense")}
+          >
+            <Ionicons
+              name="arrow-down"
+              size={24}
+              color={selectedType === "expense" ? "#fff" : "#f75f40"}
+            />
+            <Text
+              className={`font-medium ${
+                selectedType === "expense" ? "text-white" : "text-accent"
+              }`}
+            >
+              Ajouté une dépense
+            </Text>
+          </Pressable>
+        </View>
         <View className="items-center justify-center mt-5">
           <Text className="dark:text-dark-text-secondary text-text-secondary font-semibold text-sm">
             ENTRÉ LE MONTANT
           </Text>
-          <View className="flex-row items-center mt-4 gap-6 w-[95%]">
+          <View className="flex-row items-center mt-4 w-full">
             <TextInput
-              className="text-[3.75rem] w-[85%] font-bold text-text dark:text-dark-text"
+              className="h-[4.3rem] flex-1 p-4 text-[1.6rem] font-bold dark:bg-dark-surface bg-surface rounded-xl text-text dark:text-dark-text"
               value={amount}
               onChangeText={setAmount}
               keyboardType="numeric"
+              placeholder="0"
+              placeholderTextColor="#aaa"
             />
-            <Text className="text-[3rem] font-bold dark:text-dark-text text-accent">
+            <Text className="ml-4 text-[1.6rem] font-bold dark:text-dark-text text-accent">
               F
             </Text>
           </View>
@@ -190,97 +257,147 @@ const AddScreen = () => {
           <Text className="dark:text-dark-text-secondary text-text-secondary font-semibold text-sm">
             CATEGORIE
           </Text>
-          <View className="gap-4 flex-row flex-wrap mt-2">
-            {Object.values(CATEGORY_KEY).map((category) => {
-              return (
-                <Text
-                  key={category}
-                  className={`text-text dark:text-dark-text font-medium rounded-full
-                px-3 py-6
-                ${
-                  selectedCategory === category
-                    ? "bg-accent dark:text-white"
-                    : "dark:bg-dark-surface bg-surface"
-                }`}
-                  onPress={() => setSelectedCategory(category)}
-                >
-                  {category}
+          <Pressable
+            className="h-[4.3rem] flex-row items-center px-4 dark:bg-dark-surface bg-surface rounded-xl"
+            onPress={() => setShowCategoryModal(true)}
+          >
+            {selectedCategory ? (
+              <>
+                <Image
+                  source={{ uri: MAP_CATEGORY_TO_ICON[selectedCategory] }}
+                  style={{ width: 24, height: 24 }}
+                />
+                <Text className="ml-3 text-[1.6rem] font-bold text-text dark:text-dark-text">
+                  {selectedCategory}
                 </Text>
-              );
-            })}
-          </View>
+              </>
+            ) : (
+              <Text className="text-[1.6rem] font-bold text-text-secondary dark:text-dark-text-secondary">
+                Sélectionner une catégorie
+              </Text>
+            )}
+            <Ionicons
+              name="chevron-down"
+              size={24}
+              color="#aaa"
+              className="ml-auto"
+            />
+          </Pressable>
+        </View>
 
-          <View className="mt-2 gap-4">
-            <Text className="dark:text-dark-text-secondary text-text-secondary font-semibold text-sm">
-              ICONE
-            </Text>
-            <View className="flex-row gap-6 items-center">
-              {Object.values(CATEGORY_KEY).map((category) => {
-                return (
-                  <View
+        <Modal
+          visible={showCategoryModal}
+          transparent
+          animationType="slide"
+          onRequestClose={() => setShowCategoryModal(false)}
+        >
+          <View className="flex-1 justify-end bg-black/50">
+            <View className="bg-surface dark:bg-dark-surface rounded-t-3xl p-6 pb-8">
+              <View className="flex-row justify-between items-center mb-4">
+                <Text className="text-xl font-bold text-text dark:text-dark-text">
+                  Sélectionner une catégorie
+                </Text>
+                <Pressable onPress={() => setShowCategoryModal(false)}>
+                  <Ionicons name="close" size={24} color="#aaa" />
+                </Pressable>
+              </View>
+              <ScrollView className="max-h-[60vh]">
+                {Object.values(CATEGORY_KEY).map((category) => (
+                  <Pressable
                     key={category}
-                    className={`dark:bg-dark-surface-secondary bg-surface-secondary p-2 rounded-lg
-                ${
-                  selectedCategory === category
-                    ? "border border-accent/70 dark:border-accent"
-                    : ""
-                }`}
+                    className={`flex-row items-center p-4 rounded-xl mb-2 ${
+                      selectedCategory === category
+                        ? "bg-accent/20"
+                        : "bg-surface-secondary dark:bg-dark-surface-secondary"
+                    }`}
+                    onPress={() => {
+                      setSelectedCategory(category);
+                      setShowCategoryModal(false);
+                    }}
                   >
                     <Image
                       source={{ uri: MAP_CATEGORY_TO_ICON[category] }}
-                      style={{ width: 26, height: 26 }}
+                      style={{ width: 24, height: 24 }}
                     />
-                  </View>
-                );
-              })}
+                    <Text
+                      className={`ml-3 text-base font-medium ${
+                        selectedCategory === category
+                          ? "text-accent"
+                          : "text-text dark:text-dark-text"
+                      }`}
+                    >
+                      {category}
+                    </Text>
+                    {selectedCategory === category && (
+                      <Ionicons
+                        name="checkmark"
+                        size={20}
+                        color="#f75f40"
+                        className="ml-auto"
+                      />
+                    )}
+                  </Pressable>
+                ))}
+              </ScrollView>
             </View>
           </View>
+        </Modal>
 
-          <View className="mt-2 gap-4">
-            <Text className="dark:text-dark-text-secondary text-text-secondary font-semibold text-sm">
-              Date (JJ/MM/AAAA)
-            </Text>
-            <TextInput
-              className="h-16 p-4 text-[1.6rem] font-bold dark:bg-dark-surface bg-surface
-            rounded-xl text-text dark:text-dark-text"
-              value={date}
-              onChangeText={setDate}
-              placeholder="01/01/2026"
-            />
-          </View>
-
+        <View className="mt-2 gap-4">
+          <Text className="dark:text-dark-text-secondary text-text-secondary font-semibold text-sm">
+            Date (JJ/MM/AAAA)
+          </Text>
           <Pressable
-            onPress={handleAddExpense}
-            className="rounded-xl overflow-hidden active:opacity-80 mt-14"
+            className="h-16 p-4 flex-row items-center dark:bg-dark-surface bg-surface rounded-xl"
+            onPress={() => setShowDatePicker(true)}
           >
-            <LinearGradient
-              colors={["#fff0ed", "#f75f40"]}
-              start={{ x: 0, y: 0 }}
-              end={{ x: 1, y: 0 }}
-              style={{
-                display: "flex",
-                justifyContent: "center",
-                alignItems: "center",
-                height: 50,
-              }}
-            >
-              <Text className="text-center text-white font-medium text-[20px]">
-                {paramsId 
-                  ? (selectedType === "expense" ? "Modifier la dépense" : "Modifier le revenu")
-                  : (selectedType === "expense" ? "Ajouter la dépense" : "Ajouter le revenu")
-                }
-              </Text>
-            </LinearGradient>
+            <Text className="text-[1.6rem] font-bold text-text dark:text-dark-text">
+              {formatDateForDisplay(date)}
+            </Text>
           </Pressable>
-
-          {loading ? (
-            <Modal visible={loading} transparent>
-              <View className="flex-1 justify-center items-center bg-black/50">
-                <ActivityIndicator size="large" color="white" />
-              </View>
-            </Modal>
-          ) : null}
+          {showDatePicker && (
+            <DateTimePicker
+              value={date}
+              mode="date"
+              display="default"
+              onChange={(event, selectedDate) => {
+                setShowDatePicker(false);
+                if (selectedDate) {
+                  setDate(selectedDate);
+                }
+              }}
+            />
+          )}
         </View>
+
+        <Pressable
+          onPress={handleAddExpense}
+          className="rounded-xl bg-accent active:opacity-80 mt-14"
+          style={{
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            height: 50,
+          }}
+        >
+          <Text className="text-center text-white font-medium text-[20px]">
+            {paramsId
+              ? selectedType === "expense"
+                ? "Modifier la dépense"
+                : "Modifier le revenu"
+              : selectedType === "expense"
+                ? "Ajouter la dépense"
+                : "Ajouter le revenu"}
+          </Text>
+        </Pressable>
+
+        {loading ? (
+          <Modal visible={loading} transparent>
+            <View className="flex-1 justify-center items-center bg-black/50">
+              <ActivityIndicator size="large" color="white" />
+            </View>
+          </Modal>
+        ) : null}
       </ScrollView>
     </SafeAreaView>
   );

@@ -87,12 +87,12 @@ export default function HomeScreen() {
                 },
                 {
                   value: item.expense,
-                  label: item.label,
+                  label: "",
                   frontColor: "#f75f40",
                 },
               ])}
               barWidth={20}
-              spacing={30}
+              spacing={10}
               roundedTop
               noOfSections={4}
               maxValue={
@@ -115,7 +115,7 @@ export default function HomeScreen() {
             <Text className="dark:text-dark-text-secondary text-text text-xl font-medium">
               Transactions récentes
             </Text>
-            <Pressable onPress={() => router.push("/expense")}>
+            <Pressable onPress={() => router.push("/transactions")}>
               <Text className="font-medium dark:text-dark-primary-light text-accent">
                 Tout voir
               </Text>
@@ -124,9 +124,10 @@ export default function HomeScreen() {
           <View className="gap-10">
             {userTransactions &&
               userTransactions
+                .filter((expense) => expense && expense.id)
                 .slice(0, 5)
-                .map((expense, index) => (
-                  <ExpenseCard key={expense.id || index} expense={expense} />
+                .map((expense) => (
+                  <ExpenseCard key={expense.id} expense={expense} />
                 ))}
           </View>
         </View>

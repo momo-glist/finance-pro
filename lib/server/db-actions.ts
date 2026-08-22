@@ -61,8 +61,20 @@ export const createCategory = async (data: {
 
 export const getAllTransactions = async (userId: string) => {
   const rows = await db
-    .select()
+    .select({
+      id: transactions.id,
+      user_id: transactions.user_id,
+      title: transactions.title,
+      type: transactions.type,
+      category_id: transactions.category_id,
+      amount: transactions.amount,
+      transaction_date: transactions.transaction_date,
+      created_at: transactions.created_at,
+      updated_at: transactions.updated_at,
+      category_name: categories.name,
+    })
     .from(transactions)
+    .leftJoin(categories, eq(transactions.category_id, categories.id))
     .where(eq(transactions.user_id, userId))
     .orderBy(desc(transactions.transaction_date));
 

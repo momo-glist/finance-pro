@@ -89,8 +89,8 @@ export default function TabsLayout() {
         />
       </NativeTabs.Trigger>
 
-      <NativeTabs.Trigger name="expense">
-        <Label>Expenses</Label>
+      <NativeTabs.Trigger name="transactions">
+        <Label>Transactions</Label>
         <Icon
           sf={{
             default: "creditcard",

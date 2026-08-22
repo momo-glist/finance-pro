@@ -17,8 +17,8 @@ const TransactionCard = ({
       <View className="flex-row items-start gap-4">
         <View className="dark:bg-dark-surface-secondary bg-surface-secondary p-2 rounded-lg">
           <Image
-            source={{ uri: MAP_CATEGORY_TO_ICON[expense.category_id] }}
-            style={{ width: 20, height: 20 }}
+            source={{ uri: MAP_CATEGORY_TO_ICON[(expense as any).categoryName || (expense as any).categoryId] }}
+            style={{ width: 32, height: 32 }}
           />
         </View>
 
@@ -27,12 +27,20 @@ const TransactionCard = ({
             {expense.title}
           </Text>
           <Text className="text-text-secondary dark:text-dark-text-secondary">
-            {new Date(
-              (expense as any).transactionDate || expense.transaction_date,
-            ).toLocaleString("fr-FR", {
-              month: "long",
-            })}{" "}
-            {","} {expense.category_id}
+            {(() => {
+              const dateStr = (expense as any).transactionDate || expense.transaction_date;
+              // Format YYYY-MM-DD to DD/MM/YYYY
+              if (dateStr && dateStr.includes('-')) {
+                const parts = dateStr.split('-');
+                if (parts.length === 3) {
+                  return `${parts[2]}/${parts[1]}/${parts[0]}`;
+                }
+              }
+              // Fallback to Date parsing
+              const date = new Date(dateStr);
+              return isNaN(date.getTime()) ? "Date invalide" : date.toLocaleDateString("fr-FR");
+            })()}{" "}
+            {","} {(expense as any).categoryName || (expense as any).categoryId}
           </Text>
           <Text className="text-base font-semibold dark:text-dark-primary-light">
             {expense.amount} F
