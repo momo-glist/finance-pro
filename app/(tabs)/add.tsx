@@ -26,6 +26,7 @@ const AddScreen = () => {
     title: paramsTitle,
     type,
     category_id,
+    category_name,
     amount: paramsAmount,
     expense_date,
   } = useLocalSearchParams<{
@@ -35,6 +36,7 @@ const AddScreen = () => {
     amount: string;
     expense_date: string;
     category_id: string;
+    category_name: string;
   }>();
 
   const [amount, setAmount] = useState<string>(paramsAmount || "");
@@ -44,6 +46,9 @@ const AddScreen = () => {
   );
   const [selectedCategory, setSelectedCategory] = useState<string>(
     category_id || "",
+  );
+  const [selectedCategoryName, setSelectedCategoryName] = useState<string>(
+    category_name || "",
   );
   const [date, setDate] = useState<Date>(
     expense_date ? new Date(expense_date) : new Date(),
@@ -74,9 +79,9 @@ const AddScreen = () => {
     const parts = inputDate.split("-");
     if (parts.length === 3) {
       return new Date(
-        parseInt(parts[2]),
-        parseInt(parts[1]) - 1,
         parseInt(parts[0]),
+        parseInt(parts[1]) - 1,
+        parseInt(parts[2]),
       );
     }
     return new Date();
@@ -111,74 +116,100 @@ const AddScreen = () => {
         ? "Votre dépense a été ajoutée"
         : "Votre revenu a été ajoutée";
 
-    Alert.alert("Bravo", message, [
-      {
-        text: "Ajouter une autre",
-        style: "cancel",
-        onPress: () => setTimeout(() => router.replace("/transactions"), 100),
-      },
-      {
-        text: "Voir tout",
-        onPress: () => setTimeout(() => router.replace("/transactions"), 100),
-      },
-    ]);
-
     setAmount("");
     setTitle("");
     setSelectedType("");
     setSelectedCategory("");
     setDate(new Date());
-  };
-
-  const handleUpdateExpense = async () => {
-    setLoading(true);
-
-    await updateTransaction(paramsId, {
-      title,
-      type: selectedType as ITransactionType,
-      category_id: selectedCategory as string,
-      amount: Number(amount),
-      transactionDate: formatDateForAPI(date),
-    });
-
-    const message =
-      selectedType === "expense"
-        ? "Votre dépense a été modifiée"
-        : "Votre revenu a été modifié";
 
     Alert.alert("Bravo", message, [
       {
         text: "Ajouter une autre",
         style: "cancel",
-        onPress: () => setTimeout(() => router.replace("/transactions"), 100),
+        onPress: () => {
+          setLoading(false);
+          router.replace("/add");
+        },
       },
       {
         text: "Voir tout",
-        onPress: () => setTimeout(() => router.replace("/transactions"), 100),
+        onPress: () => {
+          setLoading(false);
+          router.replace("/(tabs)/transactions");
+        },
       },
     ]);
+  };
 
-    setAmount("");
-    setTitle("");
-    setSelectedCategory("");
-    setDate(new Date());
+  const handleUpdateExpense = async () => {
+    try {
+      setLoading(true);
+
+      await updateTransaction(paramsId, {
+        title,
+        type: selectedType as ITransactionType,
+        category_id: selectedCategory as string,
+        amount: Number(amount),
+        transactionDate: formatDateForAPI(date),
+      });
+
+      const message =
+        selectedType === "expense"
+          ? "Votre dépense a été modifiée"
+          : "Votre revenu a été modifié";
+
+      setAmount("");
+      setTitle("");
+      setSelectedCategory("");
+      setSelectedCategoryName("");
+      setDate(new Date());
+
+      Alert.alert("Bravo", message, [
+        {
+          text: "Ajouter une autre",
+          style: "cancel",
+          onPress: () => {
+            setLoading(false);
+            router.replace("/add");
+          },
+        },
+        {
+          text: "Voir tout",
+          onPress: () => {
+            setLoading(false);
+            router.replace("/(tabs)/transactions");
+          },
+        },
+      ]);
+    } catch (error) {
+      console.error(error);
+      setLoading(false);
+    }
   };
 
   useEffect(() => {
     setTitle(paramsTitle);
     setSelectedType(type);
     setSelectedCategory(category_id);
+    setSelectedCategoryName(category_name);
     setAmount(paramsAmount);
     if (expense_date) {
       setDate(parseDateFromAPI(expense_date));
     }
-  }, [paramsTitle, type, paramsAmount, category_id, expense_date]);
+  }, [
+    paramsTitle,
+    type,
+    category_id,
+    category_name,
+    paramsAmount,
+    expense_date,
+  ]);
 
   return (
-    <SafeAreaView className="flex-1 dark:bg-dark-background bg-background">
+    <SafeAreaView className="flex-1 dark:bg-cinder bg-background">
       <ScrollView contentContainerStyle={{ padding: 16 }}>
         <View className="items-start mt-5">
-          <Text className="dark:text-dark-text-secondary text-text-secondary font-semibold text-xl">
+          <Text className="dark:text-athens-gray/80 text-text-secondary font-semibold text-xl">
             Ajouté une transaction
           </Text>
         </View>
@@ -223,38 +254,38 @@ const AddScreen = () => {
           </Pressable>
         </View>
         <View className="items-center justify-center mt-5">
-          <Text className="dark:text-dark-text-secondary text-text-secondary font-semibold text-sm">
+          <Text className="dark:text-athens-gray/80 text-text-secondary font-semibold text-sm">
             ENTRÉ LE MONTANT
           </Text>
           <View className="flex-row items-center mt-4 w-full">
             <TextInput
-              className="h-[4.3rem] flex-1 p-4 text-[1.6rem] font-bold dark:bg-dark-surface bg-surface rounded-xl text-text dark:text-dark-text"
+              className="h-[4.3rem] flex-1 p-4 text-[1.6rem] font-bold dark:bg-dark-surface bg-surface rounded-xl text-text dark:text-athens-gray"
               value={amount}
               onChangeText={setAmount}
               keyboardType="numeric"
               placeholder="0"
               placeholderTextColor="#aaa"
             />
-            <Text className="ml-4 text-[1.6rem] font-bold dark:text-dark-text text-accent">
+            <Text className="ml-4 text-[1.6rem] font-bold dark:text-athens-gray text-accent">
               F
             </Text>
           </View>
         </View>
 
         <View className="gap-2 mt-4">
-          <Text className="dark:text-dark-text-secondary text-text-secondary font-semibold text-sm">
+          <Text className="dark:text-athens-gray/80 text-text-secondary font-semibold text-sm">
             TITRE
           </Text>
           <TextInput
             className="h-[4.3rem] p-4 text-[1.6rem] font-bold dark:bg-dark-surface bg-surface 
-            rounded-xl text-text dark:text-dark-text"
+            rounded-xl text-text dark:text-athens-gray"
             value={title}
             onChangeText={setTitle}
           />
         </View>
 
         <View className="mt-2 gap-4">
-          <Text className="dark:text-dark-text-secondary text-text-secondary font-semibold text-sm">
+          <Text className="dark:text-athens-gray/80 text-text-secondary font-semibold text-sm">
             CATEGORIE
           </Text>
           <Pressable
@@ -264,15 +295,15 @@ const AddScreen = () => {
             {selectedCategory ? (
               <>
                 <Image
-                  source={{ uri: MAP_CATEGORY_TO_ICON[selectedCategory] }}
+                  source={{ uri: MAP_CATEGORY_TO_ICON[selectedCategoryName] }}
                   style={{ width: 24, height: 24 }}
                 />
-                <Text className="ml-3 text-[1.6rem] font-bold text-text dark:text-dark-text">
-                  {selectedCategory}
+                <Text className="ml-3 text-[1.6rem] font-bold text-text dark:text-athens-gray">
+                  {selectedCategoryName}
                 </Text>
               </>
             ) : (
-              <Text className="text-[1.6rem] font-bold text-text-secondary dark:text-dark-text-secondary">
+              <Text className="text-[1.6rem] font-bold text-text-secondary dark:text-athens-gray/80">
                 Sélectionner une catégorie
               </Text>
             )}
@@ -294,7 +325,7 @@ const AddScreen = () => {
           <View className="flex-1 justify-end bg-black/50">
             <View className="bg-surface dark:bg-dark-surface rounded-t-3xl p-6 pb-8">
               <View className="flex-row justify-between items-center mb-4">
-                <Text className="text-xl font-bold text-text dark:text-dark-text">
+                <Text className="text-xl font-bold text-text dark:text-athens-gray">
                   Sélectionner une catégorie
                 </Text>
                 <Pressable onPress={() => setShowCategoryModal(false)}>
@@ -306,12 +337,13 @@ const AddScreen = () => {
                   <Pressable
                     key={category}
                     className={`flex-row items-center p-4 rounded-xl mb-2 ${
-                      selectedCategory === category
+                      selectedCategoryName === category
                         ? "bg-accent/20"
                         : "bg-surface-secondary dark:bg-dark-surface-secondary"
                     }`}
                     onPress={() => {
                       setSelectedCategory(category);
+                      setSelectedCategoryName(category);
                       setShowCategoryModal(false);
                     }}
                   >
@@ -321,20 +353,15 @@ const AddScreen = () => {
                     />
                     <Text
                       className={`ml-3 text-base font-medium ${
-                        selectedCategory === category
+                        selectedCategoryName === category
                           ? "text-accent"
-                          : "text-text dark:text-dark-text"
+                          : "text-text dark:text-athens-gray"
                       }`}
                     >
                       {category}
                     </Text>
-                    {selectedCategory === category && (
-                      <Ionicons
-                        name="checkmark"
-                        size={20}
-                        color="#f75f40"
-                        className="ml-auto"
-                      />
+                    {selectedCategoryName === category && (
+                      <Ionicons name="checkmark" size={20} color="#f75f40" />
                     )}
                   </Pressable>
                 ))}
@@ -344,14 +371,14 @@ const AddScreen = () => {
         </Modal>
 
         <View className="mt-2 gap-4">
-          <Text className="dark:text-dark-text-secondary text-text-secondary font-semibold text-sm">
+          <Text className="dark:text-athens-gray/80 text-text-secondary font-semibold text-sm">
             Date (JJ/MM/AAAA)
           </Text>
           <Pressable
             className="h-16 p-4 flex-row items-center dark:bg-dark-surface bg-surface rounded-xl"
             onPress={() => setShowDatePicker(true)}
           >
-            <Text className="text-[1.6rem] font-bold text-text dark:text-dark-text">
+            <Text className="text-[1.6rem] font-bold text-text dark:text-athens-gray">
               {formatDateForDisplay(date)}
             </Text>
           </Pressable>
@@ -379,6 +406,7 @@ const AddScreen = () => {
             alignItems: "center",
             height: 50,
           }}
+          disabled={!selectedType || !title || !selectedCategory || !amount}
         >
           <Text className="text-center text-white font-medium text-[20px]">
             {paramsId

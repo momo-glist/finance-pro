@@ -23,10 +23,10 @@ const TransactionCard = ({
         </View>
 
         <View className="gap-0.5">
-          <Text className="text-base font-semibold dark:text-dark-text w-46">
+          <Text className="text-base font-semibold dark:text-athens-gray w-46">
             {expense.title}
           </Text>
-          <Text className="text-text-secondary dark:text-dark-text-secondary">
+          <Text className="text-text-secondary dark:text-athens-gray/80">
             {(() => {
               const dateStr = (expense as any).transactionDate || expense.transaction_date;
               // Format YYYY-MM-DD to DD/MM/YYYY

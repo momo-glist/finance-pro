@@ -8,6 +8,11 @@ import {
 
 export const useTransactionStore = create<ITransactionStore>((set, get) => ({
   userTransactions: [],
+  filter: "Ce mois",
+
+  setFilter: (filter: string) => {
+    set({ filter });
+  },
 
   fetchTransactions: async (userId: string) => {
     try {
@@ -61,10 +66,13 @@ export const useTransactionStore = create<ITransactionStore>((set, get) => ({
   updateTransaction: async (id: string, input: ITransactionInpute) => {
     try {
       const { title, type, category_id, amount, transactionDate } = input || {};
+      console.log("Updating transaction with data:", { id, title, type, category_id, amount, transactionDate });
+      
       const response = await fetch(`${API_URL}/api/transaction`, {
-        method: "PATCH",
+        method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
+          id,
           title,
           type,
           category_id,
@@ -73,12 +81,22 @@ export const useTransactionStore = create<ITransactionStore>((set, get) => ({
         }),
       });
 
-      const data = await response.json();
+      const text = await response.text();
+      console.log("STATUS:", response.status);
+      console.log("RESPONSE:", text);
+
+      if (!response.ok) {
+        console.error("API error:", text);
+        return;
+      }
+
+      const data = JSON.parse(text);
+      console.log("API response:", data);
 
       set((stats) => ({
         userTransactions: stats.userTransactions.map((item) =>
           item.id === id
-            ? convertKeysToCamelCase(data.createTransactionItem)
+            ? convertKeysToCamelCase(data.updateTransactionItem)
             : item,
         ),
       }));
@@ -89,7 +107,22 @@ export const useTransactionStore = create<ITransactionStore>((set, get) => ({
 
   deleteTransaction: async (id: string) => {
     try {
-      await fetch(`${API_URL}/api/transaction/${id}`, { method: "DELETE" });
+      console.log("Deleting transaction with id:", id);
+      const response = await fetch(`${API_URL}/api/transaction`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id, action: "delete" }),
+      });
+
+      const text = await response.text();
+      console.log("DELETE STATUS:", response.status);
+      console.log("DELETE RESPONSE:", text);
+
+      if (!response.ok) {
+        console.error("DELETE error:", text);
+        return;
+      }
+
       set((state) => ({
         userTransactions: state.userTransactions.filter(
           (item) => item.id !== id,

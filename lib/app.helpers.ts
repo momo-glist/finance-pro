@@ -282,13 +282,93 @@ const getCategoryWiseData = (data: ITransactionItem[]) => {
   return chartData;
 };
 
+const getFilteredBalance = (data: ITransactionItem[]): number => {
+  if (!data || data.length === 0) {
+    return 0;
+  }
+
+  let balance = 0;
+  data.forEach((transaction: ITransactionItem) => {
+    if (!transaction) return;
+    
+    if (transaction.type === "income") {
+      balance += Number(transaction.amount || 0);
+    } else if (transaction.type === "expense") {
+      balance -= Number(transaction.amount || 0);
+    }
+  });
+
+  return balance;
+};
+
+const getFilteredIncome = (data: ITransactionItem[]): number => {
+  if (!data || data.length === 0) {
+    return 0;
+  }
+  return getTotalIncome(data);
+};
+
+const getFilteredExpense = (data: ITransactionItem[]): number => {
+  if (!data || data.length === 0) {
+    return 0;
+  }
+  return getTotalExpense(data);
+};
+
+const getDailyChartData = (data: ITransactionItem[]) => {
+  if (!data || data.length === 0) {
+    return [];
+  }
+
+  const now = new Date();
+  const currentMonth = now.getMonth();
+  const currentYear = now.getFullYear();
+  const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
+
+  const dailyMap: Record<number, { income: number; expense: number; label: string }> = {};
+
+  // Initialize all days of the month
+  for (let day = 1; day <= daysInMonth; day++) {
+    dailyMap[day] = {
+      label: day.toString().padStart(2, '0'),
+      income: 0,
+      expense: 0,
+    };
+  }
+
+  data.forEach((item) => {
+    if (!item) return;
+    
+    const dateStr = (item as any).transactionDate || item.transaction_date;
+    if (!dateStr) return;
+    
+    const date = new Date(dateStr);
+    const day = date.getDate();
+
+    if (dailyMap[day]) {
+      if (item.type === "income") {
+        dailyMap[day].income += Number(item.amount || 0);
+      } else if (item.type === "expense") {
+        dailyMap[day].expense += Number(item.amount || 0);
+      }
+    }
+  });
+
+  const chartData = Object.values(dailyMap).map(({ label, income, expense }) => ({
+    label,
+    income,
+    expense,
+  }));
+
+  return chartData;
+};
+
 export {
     convertKeysToCamelCase,
     getCategoryWiseData,
     getCurrentMonthBalance,
     getcurrentMonthExpense,
-    getcurrentMonthIncome,
-    getIncomeVsExpenseChartData,
+    getcurrentMonthIncome, getDailyChartData, getFilteredBalance, getFilteredExpense, getFilteredIncome, getIncomeVsExpenseChartData,
     getMonthWiseChartData,
     getTopCategory,
     getTotalExpense,

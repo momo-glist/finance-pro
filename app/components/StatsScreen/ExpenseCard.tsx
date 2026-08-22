@@ -14,13 +14,13 @@ const ExpenseCard = ({ expense }: { expense: ITransactionItem }) => {
           />
         </View>
         <View>
-          <Text className="text-base font-semibold dark:text-dark-text w-66">
+          <Text className="text-base font-semibold dark:text-athens-gray w-66">
             {expense.title}
           </Text>
-          <Text className="text-text-secondary dark:text-dark-text-secondary">
+          <Text className="text-text-secondary dark:text-athens-gray/80">
             {getFullDate(expense)}
           </Text>
-          <Text className="text-text-secondary dark:text-dark-text-secondary">
+          <Text className="text-text-secondary dark:text-athens-gray/80">
             {(expense as any).categoryName || expense.category_id}
           </Text>
         </View>

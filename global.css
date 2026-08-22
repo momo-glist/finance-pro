@@ -5,6 +5,7 @@
 @import "nativewind/theme";
 
 @theme {
+  /* Light theme colors */
   --color-background: #f8f7fc;
   --color-surface: #ffffff;
   --color-surface-secondary: #f5edf3;
@@ -20,7 +21,8 @@
 
   --color-success: #35a81f;
 
-  --color-dark-background: #111018;
+  /* Dark theme colors */
+  --color-cinder: #111018;
   --color-dark-surface: #1b1924;
   --color-dark-surface-secondary: #252230;
 
@@ -30,7 +32,7 @@
   --color-dark-accent: #ff755b;
   --color-dark-accent-light: #3a2525;
 
-  --color-dark-text: #f5f3fa;
+  --color-athens-gray: #f5f3fa;
   --color-dark-text-secondary: #a8a4b3;
 
   --color-dark-success: #55c93d;

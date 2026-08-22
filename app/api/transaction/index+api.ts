@@ -1,5 +1,4 @@
-import { createCategory, createTransaction, getAllTransactions, getCategories } from "@/lib/server/db-actions";
-import { MAP_CATEGORY_TO_ICON } from "@/utils/constants";
+import { createTransaction, deleteTransaction, getAllTransactions, getCategories, updateTransaction } from "@/lib/server/db-actions";
 
 export async function GET(request: Request) {
   try {
@@ -21,11 +20,68 @@ export async function GET(request: Request) {
   }
 }
 
+export async function DELETE(request: Request) {
+  try {
+    const body = await request.json();
+    const { id } = body || {};
+    
+    console.log("DELETE request body:", body);
+    console.log("Deleting transaction with id:", id);
+
+    if (!id) {
+      return Response.json({ error: "id is required" }, { status: 400 });
+    }
+
+    await deleteTransaction(id);
+
+    return Response.json({ ok: true, status: 204 });
+  } catch (error) {
+    const errorMessage =
+      error instanceof Error ? error.message : "Failed to delete the expense";
+
+    return Response.json({ error, errorMessage });
+  }
+}
+
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-    const { title, type, category_id, amount, transaction_date, userId } = body || {};
+    const { title, type, category_id, amount, transaction_date, userId, id, action } = body || {};
+    
+    console.log("POST request body:", body);
+    console.log("ID present:", id);
+    console.log("Action:", action);
 
+    // If action is delete, handle delete operation (check this first!)
+    if (action === "delete") {
+      console.log("Processing delete for id:", id);
+      if (!id) {
+        return Response.json({ error: "id is required for delete" }, { status: 400 });
+      }
+      await deleteTransaction(id);
+      return Response.json({ ok: true, status: 204 });
+    }
+
+    // If id is provided, it's an update operation
+    if (id) {
+      console.log("Processing update for id:", id);
+      const updateTransactionItem = await updateTransaction(id, {
+        title,
+        type,
+        category_id,
+        amount,
+        transaction_date,
+      });
+
+      if (!updateTransaction) {
+        return Response.json({ error: "Transaction non trouvé", status: 404 });
+      }
+
+      return Response.json({ updateTransactionItem });
+    }
+
+    console.log("Processing create operation");
+    // Otherwise, it's a create operation
     if (
       !title ||
       !type ||
@@ -40,21 +96,24 @@ export async function POST(request: Request) {
       });
     }
 
-    // Check if category exists, if not create it
+    // Check if category exists by ID (category_id should be an ID now)
     const existingCategories = await getCategories(userId);
-    const existingCategory = existingCategories.find(cat => cat.name === category_id);
+    console.log("Existing categories:", existingCategories);
+    const existingCategory = existingCategories.find(cat => cat.id === category_id);
+    console.log("Looking for category ID:", category_id);
+    console.log("Found existing category:", existingCategory);
     
-    let finalCategoryId = category_id;
+    let finalCategoryId: string;
     
-    if (!existingCategory) {
-      // Create the category
-      const newCategory = await createCategory({
-        userId,
-        name: category_id,
-        type: type as "income" | "expense",
-        icon: MAP_CATEGORY_TO_ICON[category_id as keyof typeof MAP_CATEGORY_TO_ICON] || "",
+    if (existingCategory) {
+      finalCategoryId = existingCategory.id;
+      console.log("Using existing category ID:", finalCategoryId);
+    } else {
+      console.log("Category not found, cannot create transaction without valid category_id");
+      return Response.json({ 
+        error: "Category not found. Please provide a valid category_id.", 
+        status: 400 
       });
-      finalCategoryId = newCategory.id;
     }
 
     const createTransactionItem = await createTransaction({
@@ -69,7 +128,7 @@ export async function POST(request: Request) {
     return Response.json({ createTransactionItem, status: 201 });
   } catch (error) {
     const errorMessage =
-      error instanceof Error ? error.message : "Failed to create the expense";
+      error instanceof Error ? error.message : "Failed to create/update the expense";
 
     return Response.json({ error, errorMessage });
   }

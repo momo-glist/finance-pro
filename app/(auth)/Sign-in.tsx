@@ -35,14 +35,14 @@ const SignInScreen = () => {
         />
       </View>
 
-      <View className="dark:bg-gray-suit/10 bg-white flex-1 rounded-t-[36px] px-6 pb-8 pt-6 mt-20">
-        <View className="self-center rounded-full dark:bg-secondary bg-magnolia/10 px-3 py-1">
-          <Text className="text-xs font-semibold uppercase tracking-[1px] dark:text-athens-gray text-gun-powder">
+      <View className="dark:bg-dark-surface/10 bg-white flex-1 rounded-t-[36px] px-6 pb-8 pt-6 mt-20">
+        <View className="self-center rounded-full dark:bg-primary bg-surface-secondary px-3 py-1">
+          <Text className="text-xs font-semibold uppercase tracking-[1px] dark:text-athens-gray text-text">
             Ravi de vous revoir
           </Text>
         </View>
 
-        <Text className="mt-2 text-center text-sm leading-6 dark:text-white/80 text-gray-500">
+        <Text className="mt-2 text-center text-sm leading-6 dark:text-athens-gray/80 text-text-secondary">
           Sélectionnez ci-dessous une option de connexion pour continuer et
           accéder à votre compte en toute sécurité.
         </Text>
@@ -62,7 +62,7 @@ const SignInScreen = () => {
               />
             </View>
 
-            <Text className="ml-3 flex-1 text-lg font-semibold dark:text-white">
+            <Text className="ml-3 flex-1 text-lg font-semibold dark:text-athens-gray text-text">
               {isGoogleClicked
                 ? "Connexion en cours..."
                 : "Continuer avec Google"}
@@ -81,7 +81,7 @@ const SignInScreen = () => {
               <FontAwesome6 name="github" size={16} color="#111" />
             </View>
 
-            <Text className="ml-3 flex-1 text-lg font-semibold dark:text-white">
+            <Text className="ml-3 flex-1 text-lg font-semibold dark:text-athens-gray text-text">
               {isGithubClicked
                 ? "Connexion en cours..."
                 : "Continuer avec Github"}
@@ -90,7 +90,7 @@ const SignInScreen = () => {
             <FontAwesome name="angle-right" size={16} color="#111" />
           </Pressable>
           <Pressable
-            className={`mb-3 h-14 flex-row items-center dark:bg-white/95  bg-cinder rounded-2xl px-4 active:opacity-90 ${
+            className={`mb-3 h-14 flex-row items-center dark:bg-cinder bg-white rounded-2xl border border-gray-300 px-4 active:opacity-90 ${
               isLoading ? "opacity-70" : ""
             }`}
             disabled={isLoading}
@@ -100,7 +100,7 @@ const SignInScreen = () => {
               <FontAwesome6 name="apple" size={18} color="#5f6e66" />
             </View>
 
-            <Text className="ml-3 flex-1 text-lg font-semibold dark:text-black text-white">
+            <Text className="ml-3 flex-1 text-lg font-semibold dark:text-athens-gray text-text">
               {isAppleClicked
                 ? "Connexion en cours..."
                 : "Continuer avec Apple"}
@@ -110,7 +110,7 @@ const SignInScreen = () => {
           </Pressable>
         </View>
 
-        <Text className="mt-3 text-center text-sm leading-5 dark:text-white/50 text-gray-500">
+        <Text className="mt-3 text-center text-sm leading-5 dark:text-athens-gray/50 text-text-secondary">
           En continuant, vous accepez nos conditions et notre politique de
           confidentialité
         </Text>

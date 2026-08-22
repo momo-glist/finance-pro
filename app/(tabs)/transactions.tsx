@@ -12,11 +12,23 @@ import Svg, { Circle } from "react-native-svg";
 import SafeAreaView from "../components/SafeAreaView";
 
 const ExpenseScreen = () => {
-  const { userTransactions, deleteTransaction, fetchTransactions } =
+  const { userTransactions, deleteTransaction, fetchTransactions, filter, setFilter } =
     useTransactionStore();
   const { user } = useUser();
-  const [filter, setFilter] = React.useState("Ce mois");
   const [showDropdown, setShowDropdown] = React.useState(false);
+
+  const chartColors = [
+    "#f75f40",
+    "#843bee",
+    "#22c55e",
+    "#eab308",
+    "#3b82f6",
+    "#ec4899",
+    "#14b8a6",
+    "#f97316",
+    "#6366f1",
+    "#84cc16"
+  ];
   
   const filterTransactions = (transactions: ITransactionItem[]) => {
     const now = new Date();
@@ -24,6 +36,7 @@ const ExpenseScreen = () => {
     const currentYear = now.getFullYear();
     
     return transactions.filter((t) => {
+      if (!t) return false;
       const dateStr = (t as any).transactionDate || t.transaction_date;
       if (!dateStr) return false;
       
@@ -34,8 +47,9 @@ const ExpenseScreen = () => {
           return date.getMonth() === currentMonth && date.getFullYear() === currentYear;
         case "Cette année":
           return date.getFullYear() === currentYear;
-        case "Date personnalisée":
-          return true; // TODO: Implement custom date picker
+        case "3 derniers mois":
+          const threeMonthsAgo = new Date(now.getFullYear(), now.getMonth() - 2, 1);
+          return date >= threeMonthsAgo && date <= now;
         default:
           return true;
       }
@@ -50,8 +64,10 @@ const ExpenseScreen = () => {
   const router = useRouter();
 
   const handleUpdate = (expense: ITransactionItem) => {
-    const { id, title, type, category_id, amount, transaction_date } =
-      expense || {};
+    const { id, title, type, amount } = expense || {};
+    const categoryId = (expense as any).categoryId || expense.category_id;
+    const categoryName = (expense as any).categoryName;
+    const transactionDate = (expense as any).transactionDate || (expense as any).transaction_date;
 
     router.push({
       pathname: "/add",
@@ -59,69 +75,48 @@ const ExpenseScreen = () => {
         id,
         title,
         type,
-        category_id,
+        category_id: categoryId,
+        category_name: categoryName,
         amount,
-        transaction_date: transaction_date || (expense as any).transactionDate,
+        expense_date: transactionDate,
       },
     });
   };
   const handleDelete = async (id: string) => {
     await deleteTransaction(id);
-    await fetchTransactions(id);
+    if (user?.id) {
+      await fetchTransactions(user.id);
+    }
   };
 
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
-      <SafeAreaView className="flex-1 dark:bg-dark-background bg-background">
-        <ScrollView contentContainerStyle={{ padding: 16 }}>
-          <View className="flex-row justify-between items-center mb-6">
-            <Text className="dark:text-dark-text text-text text-sm font-medium">
-              Hello, {user?.firstName} {user?.lastName}
-            </Text>
-            <TouchableOpacity
-              onPress={() => setShowDropdown(!showDropdown)}
-              className="flex-row items-center gap-2 bg-surface dark:bg-dark-surface px-4 py-2 rounded-lg"
-            >
-              <Text className="dark:text-dark-text text-text text-sm font-medium">
-                {filter}
+      <SafeAreaView className="bg-background dark:bg-cinder flex-1">
+        <View style={{ position: 'relative' }}>
+          <ScrollView contentContainerStyle={{ padding: 16 }}>
+            <View className="flex-row justify-between items-center mb-6">
+              <Text className="dark:text-athens-gray text-text text-sm font-medium">
+                Hello, {user?.firstName} {user?.lastName}
               </Text>
-              <Ionicons name={showDropdown ? "chevron-up" : "chevron-down"} size={16} color="#1e1e1e" />
-            </TouchableOpacity>
-          </View>
-          
-          {showDropdown && (
-            <View 
-              className="bg-surface dark:bg-dark-surface rounded-lg mb-6 p-2 shadow-lg"
-              style={{ width: 150, alignSelf: "flex-end" }}
-            >
-              {["Ce mois", "Cette année", "Date personnalisée"].map((option) => (
-                <TouchableOpacity
-                  key={option}
-                  onPress={() => {
-                    setFilter(option);
-                    setShowDropdown(false);
-                  }}
-                  className="py-2 px-4 rounded-lg"
-                  style={{ backgroundColor: filter === option ? "#f75f40" : "transparent" }}
-                >
-                  <Text 
-                    className="text-sm font-medium"
-                    style={{ color: filter === option ? "#fff" : "#1e1e1e" }}
-                  >
-                    {option}
-                  </Text>
-                </TouchableOpacity>
-              ))}
+              <TouchableOpacity
+                onPress={() => setShowDropdown(!showDropdown)}
+                className="flex-row items-center gap-2 bg-surface dark:bg-dark-surface px-4 py-2 rounded-lg"
+              >
+                <Text className="dark:text-athens-gray text-text text-sm font-medium">
+                  {filter}
+                </Text>
+                <Ionicons name={showDropdown ? "chevron-up" : "chevron-down"} size={16} color="#1e1e1e" />
+              </TouchableOpacity>
             </View>
-          )}
-        <View className="items-center justify-center py-4">
+            
+            <View className="items-center justify-center py-4">
           <Svg width={250} height={250}>
             {categoryWiseData.map((item, index) => {
               const percentage = (item.value / total) * 100;
               const radius = 100 - (index * 15);
               const circumference = 2 * Math.PI * radius;
               const strokeDashoffset = circumference - (percentage / 100) * circumference;
-              const color = index % 2 === 0 ? "#f75f40" : "#843bee";
+              const color = chartColors[index % chartColors.length];
               
               return (
                 <React.Fragment key={index}>
@@ -174,7 +169,7 @@ const ExpenseScreen = () => {
                       width: 12, 
                       height: 12, 
                       borderRadius: 6, 
-                      backgroundColor: index % 2 === 0 ? "#f75f40" : "#843bee" 
+                      backgroundColor: chartColors[index % chartColors.length] 
                     }} 
                   />
                   <Text className="text-base font-semibold dark:text-dark-text">
@@ -190,12 +185,11 @@ const ExpenseScreen = () => {
         </View>
 
         <View className="gap-4 mt-8">
-          <Text className="dark:text-dark-text-secondary text-text text-xl font-bold px-4">
+          <Text className="dark:text-athens-gray text-text text-xl font-bold px-4">
             Toutes vos transactions
           </Text>
           {filteredTransactions
             .filter((expense) => expense && expense.id)
-            .slice(0, 5)
             .map((expense) => {
               const renderRightActions = () => (
                 <View className="flex-row">
@@ -227,13 +221,13 @@ const ExpenseScreen = () => {
                           resizeMode="contain"
                         />
                         <View className="flex-1">
-                          <Text className="dark:text-dark-text text-text font-semibold text-lg">
+                          <Text className="dark:text-athens-gray text-text font-semibold text-lg">
                             {expense.title}
                           </Text>
-                          <Text className="dark:text-dark-text-secondary text-text-secondary text-sm mt-1">
+                          <Text className="dark:text-athens-gray/80 text-text-secondary text-sm mt-1">
                             {(expense as any).categoryName || expense.category_id}
                           </Text>
-                          <Text className="dark:text-dark-text-secondary text-text-secondary text-sm mt-1">
+                          <Text className="dark:text-athens-gray/80 text-text-secondary text-sm mt-1">
                             {(expense as any).transactionDate || expense.transaction_date}
                           </Text>
                         </View>
@@ -254,6 +248,39 @@ const ExpenseScreen = () => {
             })}
         </View>
       </ScrollView>
+      </View>
+      
+      {showDropdown && (
+        <View 
+          className="bg-surface dark:bg-dark-surface rounded-lg p-2 shadow-lg"
+          style={{ 
+            position: 'absolute',
+            right: 16,
+            top: 50,
+            width: 150,
+            zIndex: 1000
+          }}
+        >
+          {["Ce mois", "3 derniers mois", "Cette année"].map((option) => (
+            <TouchableOpacity
+              key={option}
+              onPress={() => {
+                setFilter(option);
+                setShowDropdown(false);
+              }}
+              className="py-2 px-4 rounded-lg"
+              style={{ backgroundColor: filter === option ? "#f75f40" : "transparent" }}
+            >
+              <Text 
+                className="text-sm font-medium"
+                style={{ color: filter === option ? "#fff" : "#1e1e1e" }}
+              >
+                {option}
+              </Text>
+            </TouchableOpacity>
+          ))}
+        </View>
+      )}
     </SafeAreaView>
     </GestureHandlerRootView>
   );

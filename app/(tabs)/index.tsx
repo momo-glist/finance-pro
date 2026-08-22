@@ -1,44 +1,97 @@
 import {
-  getCurrentMonthBalance,
-  getcurrentMonthExpense,
-  getcurrentMonthIncome,
-  getIncomeVsExpenseChartData,
+    getCurrentMonthBalance,
+    getcurrentMonthExpense,
+    getcurrentMonthIncome,
+    getDailyChartData,
+    getFilteredBalance,
+    getFilteredExpense,
+    getFilteredIncome,
+    getIncomeVsExpenseChartData,
 } from "@/lib/app.helpers";
 import { useTransactionStore } from "@/store/useTransactionsStore";
+import { ITransactionItem } from "@/store/useTransactionsStore.types";
+import { MAP_CATEGORY_TO_ICON } from "@/utils/constants";
 import { useUser } from "@clerk/expo";
-import { router } from "expo-router";
+import { Ionicons } from "@expo/vector-icons";
 import { ChartNoAxesColumn } from "lucide-react-native";
 import { useEffect, useState } from "react";
-import { Pressable, ScrollView, Text, View } from "react-native";
+import { Image, ScrollView, Text, TouchableOpacity, View } from "react-native";
+import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { BarChart } from "react-native-gifted-charts";
 import SafeAreaView from "../components/SafeAreaView";
-import ExpenseCard from "../components/StatsScreen/ExpenseCard";
 
 export default function HomeScreen() {
-  const { userTransactions } = useTransactionStore();
+  const { userTransactions, deleteTransaction, fetchTransactions, filter, setFilter } = useTransactionStore();
   const [chartData, setChartData] =
     useState<{ label: string; income: number; expense: number }[]>();
+  const [showDropdown, setShowDropdown] = useState(false);
 
   const { user } = useUser();
 
+  const filterTransactions = (transactions: ITransactionItem[]) => {
+    const now = new Date();
+    const currentMonth = now.getMonth();
+    const currentYear = now.getFullYear();
+    
+    return transactions.filter((t) => {
+      if (!t) return false;
+      const dateStr = (t as any).transactionDate || t.transaction_date;
+      if (!dateStr) return false;
+      
+      const date = new Date(dateStr);
+      
+      switch (filter) {
+        case "Ce mois":
+          return date.getMonth() === currentMonth && date.getFullYear() === currentYear;
+        case "Cette année":
+          return date.getFullYear() === currentYear;
+        case "3 derniers mois":
+          const threeMonthsAgo = new Date(now.getFullYear(), now.getMonth() - 2, 1);
+          return date >= threeMonthsAgo && date <= now;
+        default:
+          return true;
+      }
+    });
+  };
+  
+  const filteredTransactions = filterTransactions(userTransactions);
+
   useEffect(() => {
-    const monthData = getIncomeVsExpenseChartData(userTransactions);
-    setChartData(monthData);
-  }, [userTransactions]);
+    if (filter === "Ce mois") {
+      const dailyData = getDailyChartData(filteredTransactions);
+      setChartData(dailyData);
+    } else {
+      const monthData = getIncomeVsExpenseChartData(filteredTransactions);
+      setChartData(monthData);
+    }
+  }, [filteredTransactions, filter]);
 
   return (
-    <SafeAreaView className="bg-background dark:bg-dark-background flex-1">
-      <ScrollView contentContainerStyle={{ padding: 16 }}>
-        <View className="mb-6">
-          <Text className="dark:text-dark-text text-text text-sm font-medium">
-            Hello, {user?.firstName} {user?.lastName}
-          </Text>
-        </View>
+    <GestureHandlerRootView style={{ flex: 1 }}>
+      <SafeAreaView className="bg-background dark:bg-cinder flex-1">
+        <View style={{ position: 'relative' }}>
+          <ScrollView contentContainerStyle={{ padding: 16 }}>
+            <View className="flex-row justify-between items-center mb-6">
+              <Text className="dark:text-athens-gray text-text text-sm font-medium">
+                Hello, {user?.firstName} {user?.lastName}
+              </Text>
+              <TouchableOpacity
+                onPress={() => setShowDropdown(!showDropdown)}
+                className="flex-row items-center gap-2 bg-surface dark:bg-dark-surface px-4 py-2 rounded-lg"
+              >
+                <Text className="dark:text-athens-gray text-text text-sm font-medium">
+                  {filter}
+                </Text>
+                <Ionicons name={showDropdown ? "chevron-up" : "chevron-down"} size={16} color="#1e1e1e" />
+              </TouchableOpacity>
+            </View>
         <View className="bg-accent rounded-3xl px-6 py-8 gap-1 shadow-xs">
           <Text className="text-white text-sm font-medium">Balance</Text>
 
           <Text className="text-white font-extrabold text-[3rem]">
-            {getCurrentMonthBalance(userTransactions).toFixed(2)} F
+            {filter === "Ce mois" 
+              ? getCurrentMonthBalance(filteredTransactions).toFixed(2) 
+              : getFilteredBalance(filteredTransactions).toFixed(2)} F
           </Text>
 
           <View className="flex-row mt-6">
@@ -49,7 +102,9 @@ export default function HomeScreen() {
               </Text>
 
               <Text className="text-white font-bold text-2xl">
-                {getcurrentMonthIncome(userTransactions).toFixed(2)} F
+                {filter === "Ce mois" 
+                  ? getcurrentMonthIncome(filteredTransactions).toFixed(2) 
+                  : getFilteredIncome(filteredTransactions).toFixed(2)} F
               </Text>
             </View>
 
@@ -60,14 +115,16 @@ export default function HomeScreen() {
               </Text>
 
               <Text className="text-white font-bold text-2xl">
-                {getcurrentMonthExpense(userTransactions).toFixed(2)} F
+                {filter === "Ce mois" 
+                  ? getcurrentMonthExpense(filteredTransactions).toFixed(2) 
+                  : getFilteredExpense(filteredTransactions).toFixed(2)} F
               </Text>
             </View>
           </View>
         </View>
 
-        <View className="mt-8 bg-background dark:bg-dark-background rounded-xl px-6 py-8 gap-1">
-          <Text className="dark:text-dark-text-secondary text-text text-xl pb-8 font-medium">
+        <View className="mt-8 bg-background dark:bg-cinder rounded-xl px-6 py-8 gap-1">
+          <Text className="dark:text-athens-gray/80 text-text text-xl pb-8 font-medium">
             Allocation
           </Text>
           {!chartData || chartData.length === 0 ? (
@@ -110,28 +167,87 @@ export default function HomeScreen() {
           )}
         </View>
 
-        <View className="mt-8 rounded-xl bg-surface dark:bg-dark-surface px-6 py-8 gap-6">
-          <View className="flex-row justify-between items-center">
-            <Text className="dark:text-dark-text-secondary text-text text-xl font-medium">
-              Transactions récentes
-            </Text>
-            <Pressable onPress={() => router.push("/transactions")}>
-              <Text className="font-medium dark:text-dark-primary-light text-accent">
-                Tout voir
-              </Text>
-            </Pressable>
-          </View>
-          <View className="gap-10">
-            {userTransactions &&
-              userTransactions
-                .filter((expense) => expense && expense.id)
-                .slice(0, 5)
-                .map((expense) => (
-                  <ExpenseCard key={expense.id} expense={expense} />
-                ))}
-          </View>
+        <View className="gap-4 mt-8">
+          <Text className="dark:text-athens-gray/80 text-text text-xl font-bold px-4">
+            Transactions récentes
+          </Text>
+          {filteredTransactions
+            .filter((expense) => expense && expense.id)
+            .slice(0, 5)
+            .map((expense) => {
+              return (
+                <View
+                  key={expense.id}
+                  className="rounded-xl bg-surface dark:bg-dark-surface px-4 py-4"
+                >
+                  <View className="flex-row justify-between items-center">
+                    <View className="flex-row items-center gap-3 flex-1">
+                      <Image
+                        source={{ uri: MAP_CATEGORY_TO_ICON[(expense as any).categoryName || (expense as any).categoryId] }}
+                        style={{ width: 40, height: 40 }}
+                        resizeMode="contain"
+                      />
+                      <View className="flex-1">
+                        <Text className="dark:text-athens-gray text-text font-semibold text-lg">
+                          {expense.title}
+                        </Text>
+                        <Text className="dark:text-athens-gray/80 text-text-secondary text-sm mt-1">
+                          {(expense as any).categoryName || expense.category_id}
+                        </Text>
+                        <Text className="dark:text-athens-gray/80 text-text-secondary text-sm mt-1">
+                          {(expense as any).transactionDate || expense.transaction_date}
+                        </Text>
+                      </View>
+                    </View>
+                    <View className="flex-row items-center gap-2">
+                      <Text 
+                        className="font-bold text-lg"
+                        style={{ color: expense.type === "income" ? "#22c55e" : "#ef4444" }}
+                      >
+                        {expense.type === "income" ? "+" : "-"}{expense.amount}F
+                      </Text>
+                      <Ionicons name="chevron-forward" size={24} color="#1e1e1e" />
+                    </View>
+                  </View>
+                </View>
+              );
+            })}
         </View>
       </ScrollView>
+      </View>
+      
+      {showDropdown && (
+        <View 
+          className="bg-surface dark:bg-dark-surface rounded-lg p-2 shadow-lg"
+          style={{ 
+            position: 'absolute',
+            right: 16,
+            top: 50,
+            width: 150,
+            zIndex: 1000
+          }}
+        >
+          {["Ce mois", "3 derniers mois", "Cette année"].map((option) => (
+            <TouchableOpacity
+              key={option}
+              onPress={() => {
+                setFilter(option);
+                setShowDropdown(false);
+              }}
+              className="py-2 px-4 rounded-lg"
+              style={{ backgroundColor: filter === option ? "#f75f40" : "transparent" }}
+            >
+              <Text 
+                className="text-sm font-medium"
+                style={{ color: filter === option ? "#fff" : "#1e1e1e" }}
+              >
+                {option}
+              </Text>
+            </TouchableOpacity>
+          ))}
+        </View>
+      )}
     </SafeAreaView>
+    </GestureHandlerRootView>
   );
 }

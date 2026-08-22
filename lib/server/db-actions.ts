@@ -59,6 +59,15 @@ export const createCategory = async (data: {
   return category;
 };
 
+export const deleteCategory = async (id: string) => {
+  const [category] = await db
+    .delete(categories)
+    .where(eq(categories.id, id))
+    .returning();
+
+  return category;
+};
+
 export const getAllTransactions = async (userId: string) => {
   const rows = await db
     .select({

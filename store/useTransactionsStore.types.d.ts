@@ -26,6 +26,8 @@ export type ITransactionInpute = {
 
 export type ITransactionStore = {
   userTransactions: ITransactionItem[];
+  filter: string;
+  setFilter: (filter: string) => void;
   fetchTransactions: (userId: string) => Promise<void>;
   addTransaction: (input: ITransactionInpute) => Promise<void>;
   updateTransaction: (id: string, input: ITransactionInpute) => Promise<void>;

@@ -1,7 +1,8 @@
 import { deleteTransaction, updateTransaction } from "@/lib/server/db-actions";
 
-export async function PATH(request: Request, { id }: { id: string }) {
+export async function POST(request: Request, { params }: { params: { id: string } }) {
   try {
+    const { id } = params;
     const body = await request.json();
     const { title, type, category_id, amount, transaction_date } = body || {};
 
@@ -26,8 +27,9 @@ export async function PATH(request: Request, { id }: { id: string }) {
   }
 }
 
-export async function DELETE(_request: Request, { id }: { id: string }) {
+export async function DELETE(_request: Request, { params }: { params: { id: string } }) {
   try {
+    const { id } = params;
     await deleteTransaction(id);
 
     return Response.json({ ok: true, status: 204 });
