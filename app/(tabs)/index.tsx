@@ -13,10 +13,11 @@ import { ITransactionItem } from "@/store/useTransactionsStore.types";
 import { MAP_CATEGORY_TO_ICON } from "@/utils/constants";
 import { useUser } from "@clerk/expo";
 import { Ionicons } from "@expo/vector-icons";
+import { router } from "expo-router";
 import { ChartNoAxesColumn } from "lucide-react-native";
 import { useEffect, useState } from "react";
 import { Image, ScrollView, Text, TouchableOpacity, View } from "react-native";
-import { GestureHandlerRootView } from "react-native-gesture-handler";
+import { GestureHandlerRootView, Swipeable } from "react-native-gesture-handler";
 import { BarChart } from "react-native-gifted-charts";
 import SafeAreaView from "../components/SafeAreaView";
 
@@ -27,6 +28,28 @@ export default function HomeScreen() {
   const [showDropdown, setShowDropdown] = useState(false);
 
   const { user } = useUser();
+
+  const handleDelete = async (id: string) => {
+    await deleteTransaction(id);
+    if (user?.id) {
+      await fetchTransactions(user.id);
+    }
+  };
+
+  const handleUpdate = (expense: ITransactionItem) => {
+    router.push({
+      pathname: "/(tabs)/add",
+      params: {
+        id: expense.id,
+        title: expense.title,
+        type: expense.type,
+        category_id: expense.category_id,
+        category_name: (expense as any).categoryName,
+        amount: expense.amount.toString(),
+        expense_date: (expense as any).transactionDate || expense.transaction_date,
+      },
+    });
+  };
 
   const filterTransactions = (transactions: ITransactionItem[]) => {
     const now = new Date();
@@ -175,41 +198,59 @@ export default function HomeScreen() {
             .filter((expense) => expense && expense.id)
             .slice(0, 5)
             .map((expense) => {
+              const renderRightActions = () => (
+                <View className="flex-row">
+                  <TouchableOpacity
+                    onPress={() => handleUpdate(expense)}
+                    className="bg-blue-500 justify-center items-center px-6"
+                  >
+                    <Ionicons name="create" size={24} color="white" />
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    onPress={() => handleDelete(expense.id)}
+                    className="bg-red-500 justify-center items-center px-6"
+                  >
+                    <Ionicons name="trash" size={24} color="white" />
+                  </TouchableOpacity>
+                </View>
+              );
+
               return (
-                <View
-                  key={expense.id}
-                  className="rounded-xl bg-surface dark:bg-dark-surface px-4 py-4"
-                >
-                  <View className="flex-row justify-between items-center">
-                    <View className="flex-row items-center gap-3 flex-1">
-                      <Image
-                        source={{ uri: MAP_CATEGORY_TO_ICON[(expense as any).categoryName || (expense as any).categoryId] }}
-                        style={{ width: 40, height: 40 }}
-                        resizeMode="contain"
-                      />
-                      <View className="flex-1">
-                        <Text className="dark:text-athens-gray text-text font-semibold text-lg">
-                          {expense.title}
+                <Swipeable key={expense.id} renderRightActions={renderRightActions}>
+                  <View
+                    className="rounded-xl bg-surface dark:bg-dark-surface px-4 py-4"
+                  >
+                    <View className="flex-row justify-between items-center">
+                      <View className="flex-row items-center gap-3 flex-1">
+                        <Image
+                          source={{ uri: MAP_CATEGORY_TO_ICON[(expense as any).categoryName || (expense as any).categoryId] }}
+                          style={{ width: 40, height: 40 }}
+                          resizeMode="contain"
+                        />
+                        <View className="flex-1">
+                          <Text className="dark:text-athens-gray text-text font-semibold text-lg">
+                            {expense.title}
+                          </Text>
+                          <Text className="dark:text-athens-gray/80 text-text-secondary text-sm mt-1">
+                            {(expense as any).categoryName || expense.category_id}
+                          </Text>
+                          <Text className="dark:text-athens-gray/80 text-text-secondary text-sm mt-1">
+                            {(expense as any).transactionDate || expense.transaction_date}
+                          </Text>
+                        </View>
+                      </View>
+                      <View className="flex-row items-center gap-2">
+                        <Text 
+                          className="font-bold text-lg"
+                          style={{ color: expense.type === "income" ? "#22c55e" : "#ef4444" }}
+                        >
+                          {expense.type === "income" ? "+" : "-"}{expense.amount}F
                         </Text>
-                        <Text className="dark:text-athens-gray/80 text-text-secondary text-sm mt-1">
-                          {(expense as any).categoryName || expense.category_id}
-                        </Text>
-                        <Text className="dark:text-athens-gray/80 text-text-secondary text-sm mt-1">
-                          {(expense as any).transactionDate || expense.transaction_date}
-                        </Text>
+                        <Ionicons name="chevron-forward" size={24} color="#1e1e1e" />
                       </View>
                     </View>
-                    <View className="flex-row items-center gap-2">
-                      <Text 
-                        className="font-bold text-lg"
-                        style={{ color: expense.type === "income" ? "#22c55e" : "#ef4444" }}
-                      >
-                        {expense.type === "income" ? "+" : "-"}{expense.amount}F
-                      </Text>
-                      <Ionicons name="chevron-forward" size={24} color="#1e1e1e" />
-                    </View>
                   </View>
-                </View>
+                </Swipeable>
               );
             })}
         </View>
@@ -238,8 +279,7 @@ export default function HomeScreen() {
               style={{ backgroundColor: filter === option ? "#f75f40" : "transparent" }}
             >
               <Text 
-                className="text-sm font-medium"
-                style={{ color: filter === option ? "#fff" : "#1e1e1e" }}
+                className={`text-sm font-medium ${filter === option ? "text-white" : "dark:text-athens-gray text-text"}`}
               >
                 {option}
               </Text>

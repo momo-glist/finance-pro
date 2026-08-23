@@ -135,7 +135,25 @@ export const updateTransaction = async (
     .where(eq(transactions.id, id))
     .returning();
 
-  return transaction;
+  // Fetch the updated transaction with category name
+  const [transactionWithCategory] = await db
+    .select({
+      id: transactions.id,
+      user_id: transactions.user_id,
+      title: transactions.title,
+      type: transactions.type,
+      category_id: transactions.category_id,
+      amount: transactions.amount,
+      transaction_date: transactions.transaction_date,
+      created_at: transactions.created_at,
+      updated_at: transactions.updated_at,
+      category_name: categories.name,
+    })
+    .from(transactions)
+    .leftJoin(categories, eq(transactions.category_id, categories.id))
+    .where(eq(transactions.id, id));
+
+  return transactionWithCategory;
 };
 
 export const deleteTransaction = async (id: string) => {

@@ -1,3 +1,4 @@
+import { useCategoryStore } from "@/store/useCategoryStore";
 import { useTransactionStore } from "@/store/useTransactionsStore";
 import { ITransactionType } from "@/store/useTransactionsStore.types";
 import { CATEGORY_KEY, MAP_CATEGORY_TO_ICON } from "@/utils/constants";
@@ -50,11 +51,15 @@ const AddScreen = () => {
   const [selectedCategoryName, setSelectedCategoryName] = useState<string>(
     category_name || "",
   );
+  const [selectedCategoryId, setSelectedCategoryId] = useState<string>(
+    category_id || "",
+  );
   const [date, setDate] = useState<Date>(
     expense_date ? new Date(expense_date) : new Date(),
   );
   const [showDatePicker, setShowDatePicker] = useState(false);
   const { addTransaction, updateTransaction } = useTransactionStore();
+  const { fetchCategories, getCategoryByName, userCategories } = useCategoryStore();
   const [loading, setLoading] = useState(false);
   const [showCategoryModal, setShowCategoryModal] = useState(false);
 
@@ -100,10 +105,18 @@ const AddScreen = () => {
 
     setLoading(true);
 
+    // Get the category UUID by name
+    const category = getCategoryByName(selectedCategory);
+    if (!category) {
+      Alert.alert("Erreur", "Catégorie non trouvée");
+      setLoading(false);
+      return;
+    }
+
     await addTransaction({
       title,
       type: selectedType as ITransactionType,
-      category_id: selectedCategory as string,
+      category_id: category.id,
       amount: Number(amount),
       transactionDate: formatDateForAPI(date),
       user_id: user?.id,
@@ -128,14 +141,14 @@ const AddScreen = () => {
         style: "cancel",
         onPress: () => {
           setLoading(false);
-          router.replace("/add");
+          router.push("/add");
         },
       },
       {
         text: "Voir tout",
         onPress: () => {
           setLoading(false);
-          router.replace("/(tabs)/transactions");
+          router.push("/(tabs)/transactions");
         },
       },
     ]);
@@ -145,10 +158,28 @@ const AddScreen = () => {
     try {
       setLoading(true);
 
+      // Use the stored category ID directly if editing, otherwise find by name
+      let categoryId = selectedCategoryId;
+      if (!categoryId && selectedCategory) {
+        const category = getCategoryByName(selectedCategory);
+        if (!category) {
+          Alert.alert("Erreur", "Catégorie non trouvée");
+          setLoading(false);
+          return;
+        }
+        categoryId = category.id;
+      }
+
+      if (!categoryId) {
+        Alert.alert("Erreur", "Catégorie non trouvée");
+        setLoading(false);
+        return;
+      }
+
       await updateTransaction(paramsId, {
         title,
         type: selectedType as ITransactionType,
-        category_id: selectedCategory as string,
+        category_id: categoryId,
         amount: Number(amount),
         transactionDate: formatDateForAPI(date),
       });
@@ -170,14 +201,14 @@ const AddScreen = () => {
           style: "cancel",
           onPress: () => {
             setLoading(false);
-            router.replace("/add");
+            router.push("/add");
           },
         },
         {
           text: "Voir tout",
           onPress: () => {
             setLoading(false);
-            router.replace("/(tabs)/transactions");
+            router.push("/(tabs)/transactions");
           },
         },
       ]);
@@ -186,6 +217,24 @@ const AddScreen = () => {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    if (user?.id) {
+      fetchCategories(user.id);
+    }
+  }, [user?.id]);
+
+  // When editing, find category name from UUID and pre-select it
+  useEffect(() => {
+    if (paramsId && category_id && userCategories.length > 0) {
+      const category = userCategories.find((cat) => cat.id === category_id);
+      if (category) {
+        setSelectedCategoryName(category.name);
+        setSelectedCategory(category.name);
+        setSelectedCategoryId(category.id);
+      }
+    }
+  }, [paramsId, category_id, userCategories]);
 
   useEffect(() => {
     setTitle(paramsTitle);
@@ -344,6 +393,8 @@ const AddScreen = () => {
                     onPress={() => {
                       setSelectedCategory(category);
                       setSelectedCategoryName(category);
+                      const categoryObj = getCategoryByName(category);
+                      setSelectedCategoryId(categoryObj?.id || "");
                       setShowCategoryModal(false);
                     }}
                   >

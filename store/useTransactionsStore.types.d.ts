@@ -54,6 +54,7 @@ export type ICategoryStore = {
   userCategories: ICategoryItem[];
   fetchCategories: (userId: string) => Promise<void>;
   addCategory: (input: ICategoryInpute) => Promise<void>;
+  getCategoryByName: (name: string) => ICategoryItem | undefined;
 };
 
 export type MonthData = {
