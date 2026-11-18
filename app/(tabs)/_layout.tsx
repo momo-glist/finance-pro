@@ -2,7 +2,7 @@ import { useTransactionStore } from "@/store/useTransactionsStore";
 import { useUserStore } from "@/store/useUser";
 import { useAuth, useUser } from "@clerk/expo";
 import { Redirect } from "expo-router";
-import { Icon, Label, NativeTabs } from "expo-router/unstable-native-tabs";
+import { NativeTabs } from "expo-router/native-tabs";
 import { useEffect } from "react";
 import { useColorScheme } from "react-native";
 
@@ -57,7 +57,7 @@ export default function TabsLayout() {
     };
 
     syncUser();
-  }, [isLoaded, isUserLoaded, isSignedIn, userId, user]);
+  }, [addUser, fetchTransactions, fetchUser, isLoaded, isUserLoaded, isSignedIn, user, userId]);
 
   if (!isLoaded || !isUserLoaded) {
     return null;
@@ -70,8 +70,8 @@ export default function TabsLayout() {
   return (
     <NativeTabs tintColor={tabTintColor}>
       <NativeTabs.Trigger name="index">
-        <Label>Stats</Label>
-        <Icon
+        <NativeTabs.Trigger.Label>Stats</NativeTabs.Trigger.Label>
+        <NativeTabs.Trigger.Icon
           sf={{
             default: "chart.bar",
             selected: "chart.bar.fill",
@@ -80,8 +80,8 @@ export default function TabsLayout() {
       </NativeTabs.Trigger>
 
       <NativeTabs.Trigger name="add">
-        <Label>Add</Label>
-        <Icon
+        <NativeTabs.Trigger.Label>Add</NativeTabs.Trigger.Label>
+        <NativeTabs.Trigger.Icon
           sf={{
             default: "plus.circle",
             selected: "plus.circle.fill",
@@ -90,8 +90,8 @@ export default function TabsLayout() {
       </NativeTabs.Trigger>
 
       <NativeTabs.Trigger name="transactions">
-        <Label>Transactions</Label>
-        <Icon
+        <NativeTabs.Trigger.Label>Transactions</NativeTabs.Trigger.Label>
+        <NativeTabs.Trigger.Icon
           sf={{
             default: "creditcard",
             selected: "creditcard.fill",
@@ -100,8 +100,8 @@ export default function TabsLayout() {
       </NativeTabs.Trigger>
 
       <NativeTabs.Trigger name="profile">
-        <Label>Profile</Label>
-        <Icon
+        <NativeTabs.Trigger.Label>Profile</NativeTabs.Trigger.Label>
+        <NativeTabs.Trigger.Icon
           sf={{
             default: "person",
             selected: "person.fill",

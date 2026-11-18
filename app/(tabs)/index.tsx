@@ -12,19 +12,24 @@ import { useTransactionStore } from "@/store/useTransactionsStore";
 import { ITransactionItem } from "@/store/useTransactionsStore.types";
 import { MAP_CATEGORY_TO_ICON } from "@/utils/constants";
 import { useUser } from "@clerk/expo";
-import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
-import { ChartNoAxesColumn } from "lucide-react-native";
-import { useEffect, useState } from "react";
+import {
+  ChartNoAxesColumn,
+  ChevronDown,
+  ChevronRight,
+  ChevronUp,
+  Pencil,
+  Trash2,
+} from "lucide-react-native";
+import { useMemo, useState } from "react";
 import { Image, ScrollView, Text, TouchableOpacity, View } from "react-native";
-import { GestureHandlerRootView, Swipeable } from "react-native-gesture-handler";
+import { GestureHandlerRootView } from "react-native-gesture-handler";
+import Swipeable from "react-native-gesture-handler/ReanimatedSwipeable";
 import { BarChart } from "react-native-gifted-charts";
 import SafeAreaView from "../components/SafeAreaView";
 
 export default function HomeScreen() {
   const { userTransactions, deleteTransaction, fetchTransactions, filter, setFilter } = useTransactionStore();
-  const [chartData, setChartData] =
-    useState<{ label: string; income: number; expense: number }[]>();
   const [showDropdown, setShowDropdown] = useState(false);
 
   const { user } = useUser();
@@ -79,14 +84,11 @@ export default function HomeScreen() {
   
   const filteredTransactions = filterTransactions(userTransactions);
 
-  useEffect(() => {
+  const chartData = useMemo(() => {
     if (filter === "Ce mois") {
-      const dailyData = getDailyChartData(filteredTransactions);
-      setChartData(dailyData);
-    } else {
-      const monthData = getIncomeVsExpenseChartData(filteredTransactions);
-      setChartData(monthData);
+      return getDailyChartData(filteredTransactions);
     }
+    return getIncomeVsExpenseChartData(filteredTransactions);
   }, [filteredTransactions, filter]);
 
   return (
@@ -105,7 +107,7 @@ export default function HomeScreen() {
                 <Text className="dark:text-athens-gray text-text text-sm font-medium">
                   {filter}
                 </Text>
-                <Ionicons name={showDropdown ? "chevron-up" : "chevron-down"} size={16} color="#1e1e1e" />
+                {showDropdown ? <ChevronUp size={16} color="#1e1e1e" /> : <ChevronDown size={16} color="#1e1e1e" />}
               </TouchableOpacity>
             </View>
         <View className="bg-accent rounded-3xl px-6 py-8 gap-1 shadow-xs">
@@ -204,13 +206,13 @@ export default function HomeScreen() {
                     onPress={() => handleUpdate(expense)}
                     className="bg-blue-500 justify-center items-center px-6"
                   >
-                    <Ionicons name="create" size={24} color="white" />
+                    <Pencil size={24} color="white" />
                   </TouchableOpacity>
                   <TouchableOpacity
                     onPress={() => handleDelete(expense.id)}
                     className="bg-red-500 justify-center items-center px-6"
                   >
-                    <Ionicons name="trash" size={24} color="white" />
+                    <Trash2 size={24} color="white" />
                   </TouchableOpacity>
                 </View>
               );
@@ -246,7 +248,7 @@ export default function HomeScreen() {
                         >
                           {expense.type === "income" ? "+" : "-"}{expense.amount}F
                         </Text>
-                        <Ionicons name="chevron-forward" size={24} color="#1e1e1e" />
+                        <ChevronRight size={24} color="#1e1e1e" />
                       </View>
                     </View>
                   </View>

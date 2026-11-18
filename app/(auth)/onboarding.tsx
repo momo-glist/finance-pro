@@ -5,7 +5,7 @@ import React from "react";
 import { Dimensions, StyleSheet, View } from "react-native";
 import Onboarding from "react-native-onboarding-swiper";
 
-const { width, height } = Dimensions.get("window");
+const { width } = Dimensions.get("window");
 
 const OnboardingScreen = () => {
   const router = useRouter();

@@ -3,9 +3,15 @@ import { useTransactionStore } from "@/store/useTransactionsStore";
 import { ITransactionType } from "@/store/useTransactionsStore.types";
 import { CATEGORY_KEY, MAP_CATEGORY_TO_ICON } from "@/utils/constants";
 import { useUser } from "@clerk/expo";
-import { Ionicons } from "@expo/vector-icons";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import { router, useLocalSearchParams } from "expo-router";
+import {
+  ArrowDown,
+  ArrowUp,
+  Check,
+  ChevronDown,
+  X,
+} from "lucide-react-native";
 import React, { useEffect, useState } from "react";
 import {
     ActivityIndicator,
@@ -222,9 +228,10 @@ const AddScreen = () => {
     if (user?.id) {
       fetchCategories(user.id);
     }
-  }, [user?.id]);
+  }, [fetchCategories, user?.id]);
 
-  // When editing, find category name from UUID and pre-select it
+  // When editing, find category name from UUID and pre-select it.
+  /* eslint-disable react-hooks/set-state-in-effect */
   useEffect(() => {
     if (paramsId && category_id && userCategories.length > 0) {
       const category = userCategories.find((cat) => cat.id === category_id);
@@ -253,6 +260,7 @@ const AddScreen = () => {
     paramsAmount,
     expense_date,
   ]);
+  /* eslint-enable react-hooks/set-state-in-effect */
 
   return (
     <SafeAreaView className="flex-1 dark:bg-cinder bg-background">
@@ -269,8 +277,7 @@ const AddScreen = () => {
             }`}
             onPress={() => setSelectedType("income")}
           >
-            <Ionicons
-              name="arrow-up"
+            <ArrowUp
               size={24}
               color={selectedType === "income" ? "#fff" : "#843bee"}
             />
@@ -288,8 +295,7 @@ const AddScreen = () => {
             }`}
             onPress={() => setSelectedType("expense")}
           >
-            <Ionicons
-              name="arrow-down"
+            <ArrowDown
               size={24}
               color={selectedType === "expense" ? "#fff" : "#f75f40"}
             />
@@ -356,8 +362,7 @@ const AddScreen = () => {
                 Sélectionner une catégorie
               </Text>
             )}
-            <Ionicons
-              name="chevron-down"
+            <ChevronDown
               size={24}
               color="#aaa"
               className="ml-auto"
@@ -378,7 +383,7 @@ const AddScreen = () => {
                   Sélectionner une catégorie
                 </Text>
                 <Pressable onPress={() => setShowCategoryModal(false)}>
-                  <Ionicons name="close" size={24} color="#aaa" />
+                  <X size={24} color="#aaa" />
                 </Pressable>
               </View>
               <ScrollView className="max-h-[60vh]">
@@ -412,7 +417,7 @@ const AddScreen = () => {
                       {category}
                     </Text>
                     {selectedCategoryName === category && (
-                      <Ionicons name="checkmark" size={20} color="#f75f40" />
+                      <Check size={20} color="#f75f40" />
                     )}
                   </Pressable>
                 ))}

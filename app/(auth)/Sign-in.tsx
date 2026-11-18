@@ -1,7 +1,7 @@
 import useSocialAuth from "@/hook/useSocialAuth";
 import { OAUTH } from "@/utils/constants";
-import { FontAwesome, FontAwesome6 } from "@expo/vector-icons";
 import LottieView from "lottie-react-native";
+import { Apple, ArrowRight, Code2 } from "lucide-react-native";
 import { Image, Pressable, Text, View } from "react-native";
 import SafeAreaView from "../components/SafeAreaView";
 
@@ -68,7 +68,7 @@ const SignInScreen = () => {
                 : "Continuer avec Google"}
             </Text>
 
-            <FontAwesome name="angle-right" size={18} color="#5f6e66" />
+            <ArrowRight size={18} color="#5f6e66" />
           </Pressable>
           <Pressable
             className={`will-change-pressable mb-3 h-14 flex-row items-center rounded-2xl border border-gray-300 px-4 active:opacity-90 ${
@@ -78,7 +78,7 @@ const SignInScreen = () => {
             onPress={() => handleSocialAuth("oauth_github")}
           >
             <View className="h-8 w-8 items-center justify-center rounded-full bg-white">
-              <FontAwesome6 name="github" size={16} color="#111" />
+              <Code2 size={16} color="#111" />
             </View>
 
             <Text className="ml-3 flex-1 text-lg font-semibold dark:text-athens-gray text-text">
@@ -87,7 +87,7 @@ const SignInScreen = () => {
                 : "Continuer avec Github"}
             </Text>
 
-            <FontAwesome name="angle-right" size={16} color="#111" />
+            <ArrowRight size={16} color="#111" />
           </Pressable>
           <Pressable
             className={`mb-3 h-14 flex-row items-center dark:bg-cinder bg-white rounded-2xl border border-gray-300 px-4 active:opacity-90 ${
@@ -97,7 +97,7 @@ const SignInScreen = () => {
             onPress={() => handleSocialAuth("oauth_apple")}
           >
             <View className="h-8 w-8 items-center justify-center rounded-full bg-white">
-              <FontAwesome6 name="apple" size={18} color="#5f6e66" />
+              <Apple size={18} color="#5f6e66" />
             </View>
 
             <Text className="ml-3 flex-1 text-lg font-semibold dark:text-athens-gray text-text">
@@ -106,7 +106,7 @@ const SignInScreen = () => {
                 : "Continuer avec Apple"}
             </Text>
 
-            <FontAwesome name="angle-right" size={18} color="#5f6e66" />
+            <ArrowRight size={18} color="#5f6e66" />
           </Pressable>
         </View>
 

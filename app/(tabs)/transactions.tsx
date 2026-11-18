@@ -3,14 +3,18 @@ import { useTransactionStore } from "@/store/useTransactionsStore";
 import { ITransactionItem } from "@/store/useTransactionsStore.types";
 import { MAP_CATEGORY_TO_ICON } from "@/utils/constants";
 import { useUser } from "@clerk/expo";
-import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
-import React, { useEffect, useRef } from "react";
-import { Image, ScrollView, Text, TouchableOpacity, View } from "react-native";
 import {
-  GestureHandlerRootView,
-  Swipeable,
-} from "react-native-gesture-handler";
+  ChevronDown,
+  ChevronRight,
+  ChevronUp,
+  Pencil,
+  Trash2,
+} from "lucide-react-native";
+import React, { useEffect } from "react";
+import { Image, ScrollView, Text, TouchableOpacity, View } from "react-native";
+import { GestureHandlerRootView } from "react-native-gesture-handler";
+import Swipeable from "react-native-gesture-handler/ReanimatedSwipeable";
 import Svg, { Circle } from "react-native-svg";
 import SafeAreaView from "../components/SafeAreaView";
 
@@ -29,7 +33,7 @@ const ExpenseScreen = () => {
     if (user?.id) {
       fetchTransactions(user.id);
     }
-  }, [user?.id]);
+  }, [fetchTransactions, user?.id]);
 
   const chartColors = [
     "#f75f40",
@@ -129,11 +133,7 @@ const ExpenseScreen = () => {
                 <Text className="dark:text-athens-gray text-text text-sm font-medium">
                   {filter}
                 </Text>
-                <Ionicons
-                  name={showDropdown ? "chevron-up" : "chevron-down"}
-                  size={16}
-                  color="#1e1e1e"
-                />
+                {showDropdown ? <ChevronUp size={16} color="#1e1e1e" /> : <ChevronDown size={16} color="#1e1e1e" />}
               </TouchableOpacity>
             </View>
 
@@ -229,27 +229,23 @@ const ExpenseScreen = () => {
               {filteredTransactions
                 .filter((expense) => expense && expense.id)
                 .map((expense) => {
-                  const swipeableRef = useRef<Swipeable>(null);
-
                   const renderRightActions = () => (
                     <View className="flex-row">
                       <TouchableOpacity
                         onPress={() => {
-                          swipeableRef.current?.close();
                           handleUpdate(expense);
                         }}
                         className="bg-blue-500 justify-center items-center px-6"
                       >
-                        <Ionicons name="create" size={24} color="white" />
+                        <Pencil size={24} color="white" />
                       </TouchableOpacity>
                       <TouchableOpacity
                         onPress={() => {
-                          swipeableRef.current?.close();
                           handleDelete(expense.id);
                         }}
                         className="bg-red-500 justify-center items-center px-6"
                       >
-                        <Ionicons name="trash" size={24} color="white" />
+                        <Trash2 size={24} color="white" />
                       </TouchableOpacity>
                     </View>
                   );
@@ -257,7 +253,6 @@ const ExpenseScreen = () => {
                   return (
                     <Swipeable
                       key={expense.id}
-                      ref={swipeableRef}
                       renderRightActions={renderRightActions}
                     >
                       <View className="rounded-xl bg-surface dark:bg-dark-surface px-4 py-4">
@@ -300,11 +295,7 @@ const ExpenseScreen = () => {
                               {expense.type === "income" ? "+" : "-"}
                               {expense.amount}F
                             </Text>
-                            <Ionicons
-                              name="chevron-forward"
-                              size={24}
-                              color="#1e1e1e"
-                            />
+                            <ChevronRight size={24} color="#1e1e1e" />
                           </View>
                         </View>
                       </View>
